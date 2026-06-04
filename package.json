@@ -1,10 +1,15 @@
 {
-  "name": "border-code",
-  "version": "1.0.0",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "dev:cli": "bun run --watch packages/cli/src/index.tsx"
-  }
+	"name": "border-code",
+	"version": "1.0.0",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"format": "bunx --bun @biomejs/biome format --write",
+		"lint": "bunx --bun @biomejs/biome lint --write",
+		"dev:cli": "bun run --watch packages/cli/src/index.tsx"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.16"
+	}
 }

@@ -1,5 +1,4 @@
 {
-  "name": "@border-code/cli",
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",

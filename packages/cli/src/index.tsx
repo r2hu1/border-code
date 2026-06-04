@@ -30,17 +30,16 @@ function App() {
 						>
 							<PromptInput />
 
-              <box flexDirection="row" gap={2} flexShrink={0} marginLeft="auto">
-                <box flexDirection="row" gap={1}>
-								<text>tab</text>
-								<text attributes={TextAttributes.DIM}>agents</text>
-                </box>
-                <box flexDirection="row" gap={1}>
-								<text>/</text>
-								<text attributes={TextAttributes.DIM}>command menu</text>
-                </box>
+							<box flexDirection="row" gap={2} flexShrink={0} marginLeft="auto">
+								<box flexDirection="row" gap={1}>
+									<text>tab</text>
+									<text attributes={TextAttributes.DIM}>agents</text>
+								</box>
+								<box flexDirection="row" gap={1}>
+									<text>/</text>
+									<text attributes={TextAttributes.DIM}>command menu</text>
+								</box>
 							</box>
-
 						</box>
 					</box>
 				</ToastProvider>
@@ -49,5 +48,7 @@ function App() {
 	);
 }
 
-const renderer = await createCliRenderer();
+const renderer = await createCliRenderer({
+	targetFps: 60,
+});
 createRoot(renderer).render(<App />);

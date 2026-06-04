@@ -1,7 +1,7 @@
 import { useTheme } from "../providers/theme";
 
 export function Header() {
-  const { colors } = useTheme();
+	const { colors } = useTheme();
 	return (
 		<box justifyContent="center" alignItems="center">
 			<box
@@ -11,7 +11,7 @@ export function Header() {
 				alignItems="center"
 			>
 				<ascii-font font="pallet" text="Border" color={colors.dimSeparator} />
-				<ascii-font font="pallet" text="Code" color={colors.primary}/>
+				<ascii-font font="pallet" text="Code" color={colors.primary} />
 			</box>
 		</box>
 	);

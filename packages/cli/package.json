@@ -17,6 +17,7 @@
 		"@opentui/react": "^0.3.0",
 		"pretty-ms": "^9.3.0",
 		"react": "^19.2.6",
-		"zod": "^4.4.3"
+		"zod": "^4.4.3",
+		"@border-code/core-api": "workspace:**"
 	}
 }

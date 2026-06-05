@@ -4,27 +4,29 @@ import { DialogSearchList } from "..";
 import { createConfig, PROVIDERS, updateConfig } from "@border-code/core-api";
 import { AddApiKeyDialog } from "./add-api-key";
 import { useToast } from "../../../providers/toast";
+import { useConfig } from "../../../providers/config/config";
 
 export const ProvidersDialogContent = () => {
-  const dialog = useDialog();
-  const { show } = useToast();
+	const dialog = useDialog();
+	const { show } = useToast();
+	const { provider } = useConfig();
 
 	const handleSelect = useCallback(
-		async(item: any) => {
-      dialog.close();
-      const req = await createConfig({
-        provider: item,
-      });
-      if (req) {
-        show({
-          message: "Provider updated",
-          variant: "success",
-        })
-      }
-      dialog.open({
-        title: "Add API Key",
-        children: <AddApiKeyDialog/>,
-      })
+		async (item: any) => {
+			dialog.close();
+			const req = await createConfig({
+				provider: item,
+			});
+			if (req) {
+				show({
+					message: "Provider updated",
+					variant: "success",
+				});
+			}
+			dialog.open({
+				title: "Add API Key",
+				children: <AddApiKeyDialog />,
+			});
 		},
 		[dialog],
 	);
@@ -36,12 +38,13 @@ export const ProvidersDialogContent = () => {
 			filterFn={(t, query) => t.toLowerCase().includes(query.toLowerCase())}
 			renderItem={(item, isSelected) => (
 				<text selectable={false} fg={isSelected ? "black" : "white"}>
+					{item === provider ? "\u0020\u2022\u0020" : "\u0020\u0020\u0020"}
 					{item}
 				</text>
 			)}
 			getKey={(t) => t}
-			placeholder="Search themes"
-			emptyText="No sessions yet"
+			placeholder="Search providers"
+			emptyText="No matches found."
 		/>
 	);
 };

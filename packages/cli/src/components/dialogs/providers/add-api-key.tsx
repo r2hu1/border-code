@@ -6,36 +6,48 @@ import { createConfig, updateConfig } from "@border-code/core-api";
 import { useDialog } from "../../../providers/dialog";
 
 export const AddApiKeyDialog = () => {
-  const apiTextarea = useRef<InputRenderable>(null);
-  const { show } = useToast();
-  const { close } = useDialog();
+	const apiTextarea = useRef<InputRenderable>(null);
+	const { show } = useToast();
+	const { close } = useDialog();
 
-  const handleSubmit = async () => {
-    if (!apiTextarea.current) return;
-    const { plainText } = apiTextarea.current;
-    if (!plainText) {
-      show({
-        message: "API key cannot be empty",
-        variant: "error",
-      })
-      return;
-    };
-    const req = await updateConfig({
-      apiKey: plainText,
-    });
-    if (req) {
-      show({
-        message: "use / to select a llm model",
-        variant: "success",
-      });
-      close();
-    }
-  };
+	const handleSubmit = async () => {
+		if (!apiTextarea.current) return;
+		const { plainText } = apiTextarea.current;
+		if (!plainText) {
+			show({
+				message: "API key cannot be empty",
+				variant: "error",
+			});
+			return;
+		}
+		try {
+			const req = await updateConfig({
+				apiKey: plainText,
+			});
+			if (req) {
+				show({
+					message: "use / to select a llm model",
+					variant: "success",
+				});
+				close();
+			}
+		} catch (error) {
+			show({
+				message: "Failed to update API key",
+				variant: "error",
+			});
+		}
+	};
 
-
-  return (
-    <box>
-      <textarea keyBindings={TEXTAREA_KEY_BINDINGS} ref={apiTextarea} onKeyDown={handleSubmit} placeholder="Enter your API key..." focused/>
-    </box>
-  );
-}
+	return (
+		<box>
+			<textarea
+				keyBindings={TEXTAREA_KEY_BINDINGS}
+				ref={apiTextarea}
+				onKeyDown={handleSubmit}
+				placeholder="Enter your API key..."
+				focused
+			/>
+		</box>
+	);
+};

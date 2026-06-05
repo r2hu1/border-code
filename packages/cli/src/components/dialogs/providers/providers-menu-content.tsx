@@ -1,14 +1,30 @@
 import { useCallback } from "react";
 import { useDialog } from "../../../providers/dialog";
 import { DialogSearchList } from "..";
-import { PROVIDERS } from "@border-code/core-api";
+import { createConfig, PROVIDERS, updateConfig } from "@border-code/core-api";
+import { AddApiKeyDialog } from "./add-api-key";
+import { useToast } from "../../../providers/toast";
 
 export const ProvidersDialogContent = () => {
-	const dialog = useDialog();
+  const dialog = useDialog();
+  const { show } = useToast();
 
 	const handleSelect = useCallback(
-		(item: any) => {
-			dialog.close();
+		async(item: any) => {
+      dialog.close();
+      const req = await createConfig({
+        provider: item,
+      });
+      if (req) {
+        show({
+          message: "Provider updated",
+          variant: "success",
+        })
+      }
+      dialog.open({
+        title: "Add API Key",
+        children: <AddApiKeyDialog/>,
+      })
 		},
 		[dialog],
 	);

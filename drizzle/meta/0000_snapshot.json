@@ -1,7 +1,7 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "bef07599-5bc8-4eb3-9d14-91e6c88d7f7c",
+	"id": "5753e8cf-e8cc-4cdd-aa79-73f588dbf3bd",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
 		"sessions": {
@@ -61,6 +61,45 @@
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"config": {
+			"name": "config",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "'default'"
+				},
+				"provider": {
+					"name": "provider",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"api_key": {
+					"name": "api_key",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"model": {
+					"name": "model",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
 					"autoincrement": false
 				}
 			},

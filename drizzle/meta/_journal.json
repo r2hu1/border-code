@@ -1,27 +1,13 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1780672289213,
-      "tag": "0000_cooing_mindworm",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1780679515576,
-      "tag": "0001_stale_lila_cheney",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1780680755371,
-      "tag": "0002_keen_chamber",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1780682013533,
+			"tag": "0000_absent_plazm",
+			"breakpoints": true
+		}
+	]
 }

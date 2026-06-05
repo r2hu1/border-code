@@ -8,3 +8,10 @@ CREATE TABLE `sessions` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
+--> statement-breakpoint
+CREATE TABLE `config` (
+	`id` text PRIMARY KEY DEFAULT 'default' NOT NULL,
+	`provider` text,
+	`api_key` text,
+	`model` text
+);

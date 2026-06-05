@@ -3,7 +3,7 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export interface Message {
 	role: "user" | "agent";
-  content: string;
+	content: string;
 	mode: ModeType;
 }
 

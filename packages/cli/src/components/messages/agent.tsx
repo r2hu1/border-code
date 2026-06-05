@@ -1,5 +1,3 @@
 export function AgentMessage() {
-	return (
-<text>agent</text>
-	);
+	return <text>agent</text>;
 }

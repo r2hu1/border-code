@@ -8,13 +8,9 @@ export type Sessions = {
 	sessions: (typeof sessions.$inferSelect)[];
 };
 
-export async function getSessions() {
+export async function getSessions(): Promise<Sessions> {
 	const result = await db.select().from(sessions);
-	if (result.length === 0)
-		return {
-			count: 0,
-			sessions: [],
-		};
+
 	return {
 		count: result.length,
 		sessions: result,
@@ -22,13 +18,13 @@ export async function getSessions() {
 }
 
 export async function getSessionById(id: string) {
-	const result = await db.select().from(sessions).where(eq(sessions.id, id));
-	if (result.length === 0)
-		return {
-			session: null,
-		};
+	const result = await db
+		.select()
+		.from(sessions)
+		.where(eq(sessions.id, id));
+
 	return {
-		session: result[0],
+		session: result[0] ?? null,
 	};
 }
 
@@ -45,7 +41,7 @@ export async function createSession({
 	mode: ModeType;
 	messages: Message[];
 }) {
-	const result = await db
+	const [session] = await db
 		.insert(sessions)
 		.values({
 			title,
@@ -57,17 +53,10 @@ export async function createSession({
 			updatedAt: new Date(),
 		})
 		.returning();
+
 	return {
-		id: result[0]?.id,
-		session: {
-			title: result[0]?.title,
-			cwd: result[0]?.cwd,
-			model: result[0]?.model,
-			mode: result[0]?.mode,
-			messages: result[0]?.messages,
-			createdAt: result[0]?.createdAt,
-			updatedAt: result[0]?.updatedAt,
-		},
+		id: session?.id,
+		session,
 	};
 }
 
@@ -87,35 +76,35 @@ export async function updateSession(
 		messages?: Message[];
 	},
 ) {
-	const existingSession = await getSessionById(id);
-	if (!existingSession.session) return null;
-
-	const combinedProps = {
-		title: title ?? existingSession.session.title,
-		cwd: cwd ?? existingSession.session.cwd,
-		model: model ?? existingSession.session.model,
-		mode: mode ?? existingSession.session.mode,
-		messages: messages ?? existingSession.session.messages,
+	const updates: {
+		title?: string;
+		cwd?: string;
+		model?: string;
+		mode?: ModeType;
+		messages?: Message[];
+		updatedAt: Date;
+	} = {
+		updatedAt: new Date(),
 	};
 
-	const result = await db
+	if (title !== undefined) updates.title = title;
+	if (cwd !== undefined) updates.cwd = cwd;
+	if (model !== undefined) updates.model = model;
+	if (mode !== undefined) updates.mode = mode;
+	if (messages !== undefined) updates.messages = messages;
+
+	const [session] = await db
 		.update(sessions)
-		.set({
-			...combinedProps,
-			updatedAt: new Date(),
-		})
+		.set(updates)
 		.where(eq(sessions.id, id))
 		.returning();
+
+	if (!session) {
+		return null;
+	}
+
 	return {
-		id: result[0]?.id,
-		session: {
-			title: result[0]?.title,
-			cwd: result[0]?.cwd,
-			model: result[0]?.model,
-			mode: result[0]?.mode,
-			messages: result[0]?.messages,
-			createdAt: result[0]?.createdAt,
-			updatedAt: result[0]?.updatedAt,
-		},
+		id: session.id,
+		session,
 	};
 }

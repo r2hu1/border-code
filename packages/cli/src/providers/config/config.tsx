@@ -14,6 +14,8 @@ export const DEFAULT_CHAT_MODEL_ID = "";
 type ConfigValue = {
 	model: string | null | undefined;
 	provider: string | null | undefined;
+	apiKey: string | null | undefined;
+	refresh: () => Promise<void>;
 };
 
 const Config = createContext<ConfigValue | null>(null);
@@ -31,28 +33,29 @@ type ConfigProps = {
 };
 
 export function ConfigProvider({ children }: ConfigProps) {
-	const [provider, setProvider] = useState<string | null | undefined>(null);
-	const [model, setModel] = useState<string | null | undefined>(null);
+	const [provider, setProvider] = useState<string | null>();
+	const [model, setModel] = useState<string | null>();
+	const [apiKey, setApiKey] = useState<string | null>();
+
+	const refresh = useCallback(async () => {
+		const config = await getConfig();
+
+		setProvider(config?.provider);
+		setModel(config?.model);
+		setApiKey(config?.apiKey);
+	}, []);
 
 	useEffect(() => {
-		const updateConfig = async () => {
-			try {
-				const llmModel = await getConfig();
-				setModel(llmModel?.model);
-				setProvider(llmModel?.provider);
-			} catch (e) {
-				setModel(undefined);
-				setProvider(null);
-			}
-		};
-		updateConfig();
-	}, []);
+		refresh();
+	}, [refresh]);
 
 	return (
 		<Config.Provider
 			value={{
 				provider,
 				model,
+				apiKey,
+				refresh,
 			}}
 		>
 			{children}

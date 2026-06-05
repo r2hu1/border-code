@@ -2,14 +2,22 @@
 	"name": "border-code",
 	"version": "1.0.0",
 	"workspaces": [
-		"packages/*"
+		"packages/**"
 	],
 	"scripts": {
 		"format": "bunx --bun @biomejs/biome format --write",
 		"lint": "bunx --bun @biomejs/biome lint --write",
-		"dev:cli": "bun run --watch packages/cli/src/index.tsx"
+		"dev:cli": "bun run --watch packages/cli/src/index.tsx",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.16"
+	},
+	"dependencies": {
+		"better-sqlite3": "^12.10.0",
+		"drizzle-kit": "^0.31.10",
+		"drizzle-orm": "^0.45.2"
 	}
 }

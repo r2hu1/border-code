@@ -9,76 +9,82 @@ import { createSession } from "@border-code/core-api";
 import { useConfig } from "../providers/config/config";
 
 const newSessionStateSchema = z.object({
-  message: z.string(),
-  mode: modeSchema,
+	message: z.string(),
+	mode: modeSchema,
 });
 
 export default function NewSession() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const toast = useToast();
-  const hasStartedRef = useRef(false);
-  const { model } = useConfig();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const toast = useToast();
+	const hasStartedRef = useRef(false);
+	const { model } = useConfig();
 
-  const state = useMemo(() => {
-    const parsed = newSessionStateSchema.safeParse(location.state);
-    return parsed.success ? parsed.data : null;
-  }, [location.state]);
+	const state = useMemo(() => {
+		const parsed = newSessionStateSchema.safeParse(location.state);
+		return parsed.success ? parsed.data : null;
+	}, [location.state]);
 
-  useEffect(() => {
-     if (!state) {
-       navigate("/", { replace: true });
-     }
-   }, [state, navigate]);
+	useEffect(() => {
+		if (!state) {
+			navigate("/", { replace: true });
+		}
+	}, [state, navigate]);
 
-  useEffect(() => {
-      if (!state || hasStartedRef.current) return;
+	useEffect(() => {
+		if (!state || hasStartedRef.current) return;
 
-      hasStartedRef.current = true;
+		hasStartedRef.current = true;
 
-      let ignore = false;
-      const createDbSession = async () => {
-        try {
-          const res = await createSession({
-            title: state.message.slice(0,200),
-            cwd: process.cwd(),
-            model: model ?? "",
-            mode: state.mode,
-            messages: [{
-              role: "user",
-              content: state.message,
-            }],
-          })
+		let ignore = false;
+		const createDbSession = async () => {
+			try {
+				const res = await createSession({
+					title: state.message.slice(0, 200),
+					cwd: process.cwd(),
+					model: model ?? "",
+					mode: state.mode,
+					messages: [
+						{
+							role: "user",
+							content: state.message,
+						},
+					],
+				});
 
-          if (ignore) return;
-          if (!res.id) {
-            throw new Error("Failed to create session");
-          }
-          navigate(
-            `/sessions/${res.id}`,
-            { replace: true, state: { session: res, initialPrompt: state } }
-          );
-        } catch (error) {
-          if (ignore) return;
-          toast.show({
-            variant: "error",
-            message: error instanceof Error ? error.message : "Failed to create session",
-          });
-          navigate("/", { replace: true });
-        }
-      };
+				if (ignore) return;
+				if (!res.id) {
+					throw new Error("Failed to create session");
+				}
+				navigate(`/sessions/${res.id}`, {
+					replace: true,
+					state: { session: res, initialPrompt: state },
+				});
+			} catch (error) {
+				if (ignore) return;
+				toast.show({
+					variant: "error",
+					message:
+						error instanceof Error ? error.message : "Failed to create session",
+				});
+				navigate("/", { replace: true });
+			}
+		};
 
-      createDbSession();
-      return () => {
-        ignore = true;
-      };
-    }, [state, navigate, toast]);
+		createDbSession();
+		return () => {
+			ignore = true;
+		};
+	}, [state, navigate, toast]);
 
-    if (!state) return null;
+	if (!state) return null;
 
 	return (
 		<SessionShell onSubmit={() => {}} inputDisabled loading>
-      <UserMessage message={state?.message ?? ''} mode={state?.mode ?? "BUILD"} />
+			<UserMessage
+				message={state?.message ?? ""}
+				mode={state?.mode ?? "BUILD"}
+			/>
 		</SessionShell>
 	);
 }

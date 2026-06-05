@@ -1,10 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mode } from "../../../../shared/src/config";
 import { usePromptConfig } from "../../providers/config/prompt-config";
 import { useTheme } from "../../providers/theme";
 import { EmptyBorder } from "../border";
 import { StatusBar } from "../status";
 import type { KeyBinding, TextareaRenderable } from "@opentui/core";
+import { useDialog } from "../../providers/dialog";
+import { ThemeDialogContent } from "../dialogs/theme/theme-dialog";
+import { CommandMenuContent } from "../dialogs/menu/command";
+import { MENU_ITEMS } from "../dialogs/menu/items";
 
 type Props = {
 	onSubmit: (text: string) => void;
@@ -18,13 +22,42 @@ export const TEXTAREA_KEY_BINDINGS: KeyBinding[] = [
 	{ name: "enter", shift: true, action: "newline" },
 ];
 
-export default function PromptInput() {
+export default function PromptInput({ onSubmit, disabled }: Props) {
 	const { colors } = useTheme();
 	const { mode } = usePromptConfig();
-	const textareaRef = useRef<TextareaRenderable>(null);
+  const textareaRef = useRef<TextareaRenderable>(null);
+  const { open } = useDialog();
+  const [showMenu, setShowMenu] = useState(false);
+  const [filteredItems, setFilteredItems] = useState<typeof MENU_ITEMS | null>(null);
+
+  const handleOnSubmit = () => {
+    onSubmit(textareaRef.current?.plainText ?? "");
+  };
+
+  const handleContentChange = () => {
+    if (!textareaRef.current) return;
+    const { plainText } = textareaRef.current;
+    if (plainText.startsWith("/")) {
+      const hasWhitespaceAfterSlash = /^\/\s/.test(plainText);
+      if (!hasWhitespaceAfterSlash) {
+        setShowMenu(true);
+        const query = plainText.slice(1).toLowerCase();
+
+        setFilteredItems(
+          MENU_ITEMS.filter((t) =>
+            t.label.toLowerCase().startsWith(query)
+          )
+        );
+      } else {
+        setShowMenu(false);
+      }
+    } else {
+      setShowMenu(false);
+    }
+  };
 
 	return (
-		<box width="100%" alignItems="center">
+    <box width="100%" alignItems="center">
 			<box
 				border={["left"]}
 				borderColor={mode === Mode.BUILD ? colors.primary : colors.planMode}
@@ -34,7 +67,7 @@ export default function PromptInput() {
 					bottomLeft: "╹",
 				}}
 				width="100%"
-			>
+      >
 				<box
 					position="relative"
 					justifyContent="center"
@@ -43,15 +76,44 @@ export default function PromptInput() {
 					backgroundColor={colors.surface}
 					width="100%"
 					gap={1}
-				>
+        >
+          {showMenu && <CommandMenu filteredItems={filteredItems} />}
+
 					<textarea
 						placeholder="Ask or command anything..."
 						keyBindings={TEXTAREA_KEY_BINDINGS}
-						ref={textareaRef}
+            ref={textareaRef}
+            onSubmit={handleOnSubmit}
+            onContentChange={handleContentChange}
 					/>
 					<StatusBar />
 				</box>
 			</box>
 		</box>
 	);
+}
+
+type CommandMenuProps = {
+  filteredItems: typeof MENU_ITEMS | null;
+};
+
+const CommandMenu = ({ filteredItems }: CommandMenuProps) => {
+  const { colors } = useTheme();
+  const height = Math.max(4, filteredItems?.length ?? 0);
+
+  return (
+    <scrollbox height={height} backgroundColor={colors.surface} padding={1} position="absolute" bottom={5.5} left={-1} zIndex={99}>
+      <box flexDirection="column">
+        {filteredItems && filteredItems.map((i) => (
+          <box flexDirection="row" gap={1} key={i.value}>
+            <text>/{i.label}</text>
+            <text fg={colors.dimSeparator}>{i.description}</text>
+          </box>
+        ))}
+        {(!filteredItems || filteredItems.length === 0) && (
+          <text fg={colors.dimSeparator}>No matching commands available</text>
+        )}
+      </box>
+    </scrollbox>
+  )
 }

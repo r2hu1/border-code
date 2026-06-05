@@ -5,6 +5,8 @@ import { useToast } from "../providers/toast";
 import { useEffect, useMemo, useRef } from "react";
 import { SessionShell } from "../components/session-shell";
 import { UserMessage } from "../components/messages";
+import { createSession } from "@border-code/core-api";
+import { useConfig } from "../providers/config/config";
 
 const newSessionStateSchema = z.object({
   message: z.string(),
@@ -16,6 +18,7 @@ export default function NewSession() {
   const location = useLocation();
   const toast = useToast();
   const hasStartedRef = useRef(false);
+  const { model } = useConfig();
 
   const state = useMemo(() => {
     const parsed = newSessionStateSchema.safeParse(location.state);
@@ -27,6 +30,51 @@ export default function NewSession() {
        navigate("/", { replace: true });
      }
    }, [state, navigate]);
+
+  useEffect(() => {
+      if (!state || hasStartedRef.current) return;
+
+      hasStartedRef.current = true;
+
+      let ignore = false;
+      const createDbSession = async () => {
+        try {
+          const res = await createSession({
+            title: state.message.slice(0,200),
+            cwd: process.cwd(),
+            model: model ?? "",
+            mode: state.mode,
+            messages: [{
+              role: "user",
+              content: state.message,
+            }],
+          })
+
+          if (ignore) return;
+          if (!res.id) {
+            throw new Error("Failed to create session");
+          }
+          navigate(
+            `/sessions/${res.id}`,
+            { replace: true, state: { session: res, initialPrompt: state } }
+          );
+        } catch (error) {
+          if (ignore) return;
+          toast.show({
+            variant: "error",
+            message: error instanceof Error ? error.message : "Failed to create session",
+          });
+          navigate("/", { replace: true });
+        }
+      };
+
+      createDbSession();
+      return () => {
+        ignore = true;
+      };
+    }, [state, navigate, toast]);
+
+    if (!state) return null;
 
 	return (
 		<SessionShell onSubmit={() => {}} inputDisabled loading>

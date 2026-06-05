@@ -1,3 +1,5 @@
 # Border Code (in development)
 
-A cli coding agent with remote control, multi-models and works fully on-device.
+A open-source on-device coding agent.
+
+![Preview](assets/preview.png)

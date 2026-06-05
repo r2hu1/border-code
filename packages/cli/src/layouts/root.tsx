@@ -11,21 +11,24 @@ import {
 	usePromptConfig,
 } from "../providers/config/prompt-config";
 import { DialogProvider } from "../providers/dialog";
+import { ConfigProvider } from "../providers/config/config";
 
 export function RootLayout() {
 	return (
-		<ThemeProvider>
-			<ToastProvider>
-				<KeyboardLayerProvider>
-					<DialogProvider>
-						<PromptConfigProvider>
-							<ThemedRoot>
-								<Outlet />
-							</ThemedRoot>
-						</PromptConfigProvider>
-					</DialogProvider>
-				</KeyboardLayerProvider>
-			</ToastProvider>
-		</ThemeProvider>
+		<ConfigProvider>
+			<PromptConfigProvider>
+				<ThemeProvider>
+					<ToastProvider>
+						<KeyboardLayerProvider>
+							<DialogProvider>
+								<ThemedRoot>
+									<Outlet />
+								</ThemedRoot>
+							</DialogProvider>
+						</KeyboardLayerProvider>
+					</ToastProvider>
+				</ThemeProvider>
+			</PromptConfigProvider>
+		</ConfigProvider>
 	);
 }

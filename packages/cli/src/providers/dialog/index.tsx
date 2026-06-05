@@ -91,16 +91,18 @@ function Dialog({ currentDialog, close }: DialogProps) {
 			height={dimensions.height}
 			justifyContent="center"
 			alignItems="center"
-			backgroundColor={RGBA.fromInts(0, 0, 0, 150)}
-			zIndex={100}
-			onMouseDown={() => close()}
+			backgroundColor={RGBA.fromInts(0, 0, 0, 100)}
+			zIndex={9999}
+      onMouseDown={() => close()}
 		>
 			<box
 				width={Math.min(60, dimensions.width - 4)}
 				height="auto"
 				backgroundColor={colors.surface}
-				paddingX={4}
-				paddingY={1}
+				paddingX={2}
+        paddingY={1}
+        border={["left", "right", "top", "bottom"]}
+        borderColor={colors.dimSeparator}
 				flexDirection="column"
 				gap={1}
 				onMouseDown={(e) => e.stopPropagation()}

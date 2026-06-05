@@ -43,7 +43,7 @@ export function Home() {
 			}
 			navigate("/sessions/new", { state: { message: text, mode } });
 		},
-		[navigate, mode],
+		[navigate, mode, provider, model, apiKey, refresh, show],
 	);
 
 	return (

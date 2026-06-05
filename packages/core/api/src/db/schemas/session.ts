@@ -3,7 +3,8 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export interface Message {
 	role: "user" | "agent";
-	content: string;
+  content: string;
+	mode: ModeType;
 }
 
 export const sessions = sqliteTable("sessions", {
@@ -12,7 +13,6 @@ export const sessions = sqliteTable("sessions", {
 		.$defaultFn(() => crypto.randomUUID()),
 	title: text("title").notNull(),
 	cwd: text("cwd").notNull(),
-	model: text("model").notNull(),
 	mode: text("mode").notNull().$type<ModeType>(),
 	messages: text("messages", { mode: "json" }).$type<Message[]>().notNull(),
 	createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),

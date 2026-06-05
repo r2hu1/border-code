@@ -18,10 +18,7 @@ export async function getSessions(): Promise<Sessions> {
 }
 
 export async function getSessionById(id: string) {
-	const result = await db
-		.select()
-		.from(sessions)
-		.where(eq(sessions.id, id));
+	const result = await db.select().from(sessions).where(eq(sessions.id, id));
 
 	return {
 		session: result[0] ?? null,

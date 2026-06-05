@@ -7,14 +7,40 @@ import PromptInput from "../components/input/prompt-input";
 import path from "path";
 import { cwd } from "process";
 import { useTheme } from "../providers/theme";
+import { useConfig } from "../providers/config/config";
+import { useToast } from "../providers/toast";
 
 export function Home() {
 	const navigate = useNavigate();
 	const { colors } = useTheme();
-	const { mode, model } = usePromptConfig();
+	const { show } = useToast();
+	const { mode } = usePromptConfig();
+	const { provider, model, apiKey, refresh } = useConfig();
 
 	const handleSubmit = useCallback(
-		(text: string) => {
+		async (text: string) => {
+			await refresh();
+			if (!provider) {
+				show({
+					message: "No provider configured",
+					variant: "error",
+				});
+				return;
+			}
+			if (!model) {
+				show({
+					message: "No model configured",
+					variant: "error",
+				});
+				return;
+			}
+			if (!apiKey) {
+				show({
+					message: "No API key configured",
+					variant: "error",
+				});
+				return;
+			}
 			navigate("/sessions/new", { state: { message: text, mode } });
 		},
 		[navigate, mode],

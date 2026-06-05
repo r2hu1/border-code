@@ -1,7 +1,10 @@
+import { useParams } from "react-router";
+
 export default function Session() {
-  return (
-    <box>
-      <text>hey</text>
-    </box>
-  )
+	const { id } = useParams();
+	return (
+		<box>
+			<text>Session: {id}</text>
+		</box>
+	);
 }

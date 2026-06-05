@@ -7,6 +7,7 @@ import { useNavigate } from "react-router";
 import { ThemeDialogContent } from "../theme/theme-dialog";
 import { SessionDialogContent } from "../session/session-dialog-content";
 import { ProvidersDialogContent } from "../providers/providers-menu-content";
+import { SelectModalDialogContent } from "../models/select-model-dialog-content";
 
 export const CommandMenuContent = () => {
 	const dialog = useDialog();
@@ -30,6 +31,13 @@ export const CommandMenuContent = () => {
 				dialog.open({
 					title: "Select a provider",
 					children: <ProvidersDialogContent />,
+				});
+				break;
+			case "models":
+				dialog.close();
+				dialog.open({
+					title: "Select a model",
+					children: <SelectModalDialogContent />,
 				});
 				break;
 			case "themes":

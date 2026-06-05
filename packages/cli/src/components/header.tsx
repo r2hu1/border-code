@@ -11,7 +11,7 @@ export function Header() {
 				alignItems="center"
 			>
 				<ascii-font font="pallet" text="Border" color={colors.dimSeparator} />
-				<ascii-font font="pallet" text="Code" color={colors.primary} />
+				<ascii-font font="pallet" text="Code" />
 			</box>
 		</box>
 	);

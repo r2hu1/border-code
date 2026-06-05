@@ -1,54 +1,29 @@
-import { createCliRenderer, TextAttributes } from "@opentui/core";
+import { createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
-import { Header } from "./components/header";
-import { ThemeProvider } from "./providers/theme";
-import { ToastProvider } from "./providers/toast";
-import PromptInput from "./components/input/prompt-input";
-import { PromptConfigProvider } from "./providers/config/prompt-config";
+import { createMemoryRouter, RouterProvider } from "react-router";
+import { RootLayout } from "./layouts/root";
+import { Home } from "./screens/home";
+import NewSession from "./screens/new-session";
+import Session from "./screens/session";
+
+const router = createMemoryRouter([
+	{
+		path: "/",
+		element: <RootLayout />,
+		children: [
+			{ index: true, element: <Home /> },
+			{ path: "sessions/new", element: <NewSession /> },
+			{ path: "sessions/:id", element: <Session /> },
+		],
+	},
+]);
 
 function App() {
-	return (
-		<ThemeProvider>
-			<PromptConfigProvider>
-				<ToastProvider>
-					<box
-						alignItems="center"
-						justifyContent="center"
-						flexGrow={1}
-						gap={2}
-						position="relative"
-						width="100%"
-						height="100%"
-					>
-						<Header />
-						<box
-							width="100%"
-							maxWidth={78}
-							paddingX={2}
-							flexDirection="column"
-							gap={1}
-						>
-							<PromptInput />
-
-							<box flexDirection="row" gap={2} flexShrink={0} marginLeft="auto">
-								<box flexDirection="row" gap={1}>
-									<text>tab</text>
-									<text attributes={TextAttributes.DIM}>agents</text>
-								</box>
-								<box flexDirection="row" gap={1}>
-									<text>/</text>
-									<text attributes={TextAttributes.DIM}>command menu</text>
-								</box>
-							</box>
-						</box>
-					</box>
-				</ToastProvider>
-			</PromptConfigProvider>
-		</ThemeProvider>
-	);
+	return <RouterProvider router={router} />;
 }
 
 const renderer = await createCliRenderer({
 	targetFps: 60,
+	exitOnCtrlC: false,
 });
 createRoot(renderer).render(<App />);

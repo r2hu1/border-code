@@ -15,9 +15,9 @@ export function Home() {
 
 	const handleSubmit = useCallback(
 		(text: string) => {
-			navigate("/sessions/new", { state: { message: text, mode, model } });
+			navigate("/sessions/new", { state: { message: text, mode } });
 		},
-		[navigate, mode, model],
+		[navigate, mode],
 	);
 
 	return (

@@ -1,1 +1,1 @@
-export { Mode, type ModeType } from "./config";
+export { Mode, type ModeType, modeSchema } from "./config";

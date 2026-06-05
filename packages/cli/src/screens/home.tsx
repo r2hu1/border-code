@@ -38,7 +38,7 @@ export function Home() {
 				<box flexDirection="row" gap={2} flexShrink={0} marginLeft="auto">
 					<box flexDirection="row" gap={1}>
 						<text>tab</text>
-						<text attributes={TextAttributes.DIM}>agents</text>
+						<text attributes={TextAttributes.DIM}>mode</text>
 					</box>
 					<box flexDirection="row" gap={1}>
 						<text>/</text>

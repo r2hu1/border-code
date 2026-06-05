@@ -110,7 +110,7 @@ export function DialogSearchList<T>({
 							<box
 								key={getKey(item)}
 								flexDirection="row"
-                height={1}
+								height={1}
 								overflow="hidden"
 								backgroundColor={isSelected ? colors.selection : undefined}
 								onMouseMove={() => {

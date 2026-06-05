@@ -9,6 +9,8 @@ import { useDialog } from "../../providers/dialog";
 import { ThemeDialogContent } from "../dialogs/theme/theme-dialog";
 import { CommandMenuContent } from "../dialogs/menu/command";
 import { MENU_ITEMS } from "../dialogs/menu/items";
+import { useKeyboardLayer } from "../../providers/config/keyboard";
+import { useKeyboard } from "@opentui/react";
 
 type Props = {
 	onSubmit: (text: string) => void;
@@ -24,15 +26,27 @@ export const TEXTAREA_KEY_BINDINGS: KeyBinding[] = [
 
 export default function PromptInput({ onSubmit, disabled }: Props) {
 	const { colors } = useTheme();
-	const { mode } = usePromptConfig();
+	const { mode,setMode } = usePromptConfig();
   const textareaRef = useRef<TextareaRenderable>(null);
   const { open } = useDialog();
   const [showMenu, setShowMenu] = useState(false);
   const [filteredItems, setFilteredItems] = useState<typeof MENU_ITEMS | null>(null);
-
+  const [test, setTest] = useState();
   const handleOnSubmit = () => {
     onSubmit(textareaRef.current?.plainText ?? "");
   };
+
+  useKeyboard((key) => {
+    if(key.name === "tab" && !key.shift) {
+      setMode(mode === "BUILD" ? "PLAN" : "BUILD")
+    }
+    if (key.name === "tab" && key.shift) {
+      open({
+        title: "Command Menu",
+        children: <CommandMenuContent/>,
+      })
+    }
+  })
 
   const handleContentChange = () => {
     if (!textareaRef.current) return;
@@ -40,16 +54,10 @@ export default function PromptInput({ onSubmit, disabled }: Props) {
     if (plainText.startsWith("/")) {
       const hasWhitespaceAfterSlash = /^\/\s/.test(plainText);
       if (!hasWhitespaceAfterSlash) {
-        setShowMenu(true);
-        const query = plainText.slice(1).toLowerCase();
-
-        setFilteredItems(
-          MENU_ITEMS.filter((t) =>
-            t.label.toLowerCase().startsWith(query)
-          )
-        );
-      } else {
-        setShowMenu(false);
+        open({
+          title: "Command Menu",
+          children: <CommandMenuContent/>,
+        })
       }
     } else {
       setShowMenu(false);

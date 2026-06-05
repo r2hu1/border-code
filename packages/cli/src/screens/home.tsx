@@ -4,9 +4,13 @@ import { Header } from "../components/header";
 import { usePromptConfig } from "../providers/config/prompt-config";
 import { TextAttributes } from "@opentui/core";
 import PromptInput from "../components/input/prompt-input";
+import path from "path";
+import { cwd } from "process";
+import { useTheme } from "../providers/theme";
 
 export function Home() {
 	const navigate = useNavigate();
+	const { colors } = useTheme();
 	const { mode, model } = usePromptConfig();
 
 	const handleSubmit = useCallback(
@@ -38,14 +42,17 @@ export function Home() {
 				<box flexDirection="row" gap={2} flexShrink={0} marginLeft="auto">
 					<box flexDirection="row" gap={1}>
 						<text>tab</text>
-						<text attributes={TextAttributes.DIM}>mode</text>
+						<text attributes={TextAttributes.DIM}>agents</text>
 					</box>
 					<box flexDirection="row" gap={1}>
-						<text>/</text>
+						<text>shift+tab</text>
 						<text attributes={TextAttributes.DIM}>commands</text>
 					</box>
 				</box>
 			</box>
+			<text position="absolute" bottom={0} left={0} fg={colors.dimSeparator}>
+				~{cwd()}
+			</text>
 		</box>
 	);
 }

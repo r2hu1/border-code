@@ -38,7 +38,7 @@ export const SessionDialogContent = () => {
 				</text>
 			)}
 			getKey={(t) => t.title}
-			placeholder="Search themes"
+			placeholder="Search sessions"
 			emptyText="No sessions yet"
 		/>
 	);

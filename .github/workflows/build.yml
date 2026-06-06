@@ -1,76 +1,80 @@
-name: Build CLI
+name: Build & Release
 
 on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: bun-linux-x64
-            suffix: ""
-          - os: macos-latest
-            target: bun-darwin-arm64
-            suffix: ""
-          - os: macos-13
-            target: bun-darwin-x64
-            suffix: ""
-          - os: windows-latest
-            target: bun-windows-x64
-            suffix: ".exe"
+    name: Build binaries
+    runs-on: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        target:
+          - bun-darwin-arm64
+          - bun-darwin-x64
+          - bun-linux-x64
+          - bun-linux-arm64
+          - bun-windows-x64
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+        uses: oven-sh/setup-bun@v1
 
-      - name: Install dependencies
+      - name: Install deps
         run: bun install
 
-      - name: Build standalone executable
+      - name: Build
         run: |
-          bun build --compile \
-            --target=${{ matrix.target }} \
-            --sourcemap \
-            --minify \
-            --outfile=border-code-${{ matrix.target }}${{ matrix.suffix }} \
-            packages/cli/src/index.tsx
+          TARGET=${{ matrix.target }}
+
+          if [[ "$TARGET" == "bun-darwin-arm64" ]]; then
+            OUT="border-code-macos-arm64"
+          elif [[ "$TARGET" == "bun-darwin-x64" ]]; then
+            OUT="border-code-macos-x64"
+          elif [[ "$TARGET" == "bun-linux-x64" ]]; then
+            OUT="border-code-linux-x64"
+          elif [[ "$TARGET" == "bun-linux-arm64" ]]; then
+            OUT="border-code-linux-arm64"
+          elif [[ "$TARGET" == "bun-windows-x64" ]]; then
+            OUT="border-code-windows-x64.exe"
+          fi
+
+          bun build packages/cli/src/index.tsx --compile --target=$TARGET --outfile=$OUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: border-code-${{ matrix.target }}
-          path: border-code-${{ matrix.target }}${{ matrix.suffix }}
-          if-no-files-found: error
+          name: ${{ matrix.target }}
+          path: border-code-*
 
   release:
+    name: Create Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: border-code-*
-          merge-multiple: true
+          path: dist
+
+      - name: Flatten files
+        run: |
+          mkdir release
+          find dist -type f -exec mv {} release/ \;
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: border-code-*
-          generate_release_notes: true
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

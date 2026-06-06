@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { executeLocalTool } from "./local-tools";
-import { Mode } from "@border-code/shared";
+import { Mode, type ModeType } from "@border-code/shared";
 
 export const readFileTool = tool({
   description:
@@ -153,3 +153,14 @@ export const allTools = {
   editFile: editFileTool,
   bash: bashTool,
 } as const;
+
+export const getToolForMode = (mode: ModeType) => {
+  switch (mode) {
+    case Mode.BUILD:
+      return allTools;
+    case Mode.PLAN:
+      return readOnlyTools;
+    default:
+      return readOnlyTools;
+  }
+};

@@ -45,7 +45,6 @@ export function AgentMessage({ message }: Props) {
 					flexDirection="column"
 					paddingX={2}
 					paddingY={1}
-					backgroundColor={colors.surface}
 					width="100%"
 					gap={1}
 				>

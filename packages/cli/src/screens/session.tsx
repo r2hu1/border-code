@@ -4,6 +4,7 @@ import { SessionShell } from "../components/session-shell";
 import { UserMessage, AgentMessage } from "../components/messages";
 import { useToast } from "../providers/toast";
 import { useConfig } from "../providers/config/config";
+import { usePromptConfig } from "../providers/config/prompt-config";
 import {
 	getSessionById,
 	updateSession,
@@ -58,6 +59,7 @@ export default function Session() {
 	const { id } = useParams();
 	const { show } = useToast();
 	const { provider, model, apiKey, refresh } = useConfig();
+	const { mode: contextMode } = usePromptConfig();
 	const [sessionData, setSessionData] = useState<Session | null>(null);
 	const busyRef = useRef(false);
 
@@ -112,10 +114,13 @@ export default function Session() {
 			const userMsg: Message = {
 				role: "user",
 				content: text,
-				mode: sessionData.mode,
+				mode: contextMode,
 			};
 			const withUser = [...sessionData.messages, userMsg];
-			const updated = await updateSession(id ?? "", { messages: withUser });
+			const updated = await updateSession(id ?? "", {
+				messages: withUser,
+				mode: contextMode,
+			});
 			if (updated?.session) {
 				setSessionData(updated.session);
 			}
@@ -124,13 +129,13 @@ export default function Session() {
 			streamResponse(
 				id ?? "",
 				withUser,
-				sessionData.mode,
+				contextMode,
 				(m) => setSessionData((prev) => (prev ? { ...prev, messages: m } : prev)),
 				() => { busyRef.current = false; },
 				() => { busyRef.current = false; },
 			);
 		},
-		[sessionData, id, provider, model, apiKey, refresh, show],
+		[sessionData, id, provider, model, apiKey, refresh, show, contextMode],
 	);
 
 	const loading = !sessionData || busyRef.current;

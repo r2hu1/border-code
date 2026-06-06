@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { sessions, type Message } from "../../db/schemas";
 import type { ModeType } from "@border-code/shared";
@@ -9,7 +9,7 @@ export type Sessions = {
 };
 
 export async function getSessions(): Promise<Sessions> {
-	const result = await db.select().from(sessions);
+	const result = (await db.select().from(sessions)).reverse();
 
 	return {
 		count: result.length,

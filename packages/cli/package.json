@@ -7,14 +7,16 @@
 		"dev": "bun run --watch src/index.tsx"
 	},
 	"devDependencies": {
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@types/react": "^19.2.17",
+		"@types/react-dom": "^19.2.3"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
 	},
 	"dependencies": {
 		"@border-code/core-api": "workspace:**",
-         "@border-code/shared": "workspace:**",
+		"@border-code/shared": "workspace:**",
 		"@opentui/core": "^0.3.0",
 		"@opentui/react": "^0.3.0",
 		"opentui-spinner": "^0.0.6",

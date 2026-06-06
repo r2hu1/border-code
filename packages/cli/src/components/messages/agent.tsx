@@ -16,12 +16,8 @@ function ToolCalls({ message }: { message: Message }) {
 		<box flexDirection="column" width="100%" gap={0}>
 			{message.toolCalls.map((tc, i) => (
 				<box key={i} flexDirection="column" width="100%" gap={0}>
-					<text attributes={TextAttributes.DIM}>
-						── Tool: {tc.toolName} ──
-					</text>
-					<text attributes={TextAttributes.DIM}>
-						{JSON.stringify(tc.args)}
-					</text>
+					<text attributes={TextAttributes.DIM}>── Tool: {tc.toolName} ──</text>
+					<text attributes={TextAttributes.DIM}>{JSON.stringify(tc.args)}</text>
 					{tc.result !== undefined ? (
 						<text attributes={TextAttributes.DIM}>
 							→ {JSON.stringify(tc.result).slice(0, 200)}
@@ -38,9 +34,7 @@ export function AgentMessage({ message }: Props) {
 
 	return (
 		<box width="100%" alignItems="center">
-			<box
-				width="100%"
-			>
+			<box width="100%">
 				<box
 					flexDirection="column"
 					paddingX={2}

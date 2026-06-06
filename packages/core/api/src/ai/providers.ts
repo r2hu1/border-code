@@ -51,7 +51,10 @@ export function getProviderConfig(
 			return {
 				url: "https://openrouter.ai/api/v1/models",
 				headers: { Authorization: `Bearer ${apiKey}` },
-				extractModels: (data) => data.data.filter((m: any) => m.supported_parameters.includes("tools")).map((m: any) => m.id),
+				extractModels: (data) =>
+					data.data
+						.filter((m: any) => m.supported_parameters.includes("tools"))
+						.map((m: any) => m.id),
 			};
 
 		case "groq":
@@ -65,7 +68,14 @@ export function getProviderConfig(
 			return {
 				url: "https://api.mistral.ai/v1/models",
 				headers: { Authorization: `Bearer ${apiKey}` },
-				extractModels: (data) => data.data.filter((m: any) => m.capabilities.function_calling === true && m.capabilities.reasoning === true).map((m: any) => m.id),
+				extractModels: (data) =>
+					data.data
+						.filter(
+							(m: any) =>
+								m.capabilities.function_calling === true &&
+								m.capabilities.reasoning === true,
+						)
+						.map((m: any) => m.id),
 			};
 		default:
 			throw new Error(`Unsupported provider: ${provider}`);

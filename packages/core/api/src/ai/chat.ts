@@ -31,13 +31,18 @@ export type ChatOptions = {
 };
 
 export async function chat(options: ChatOptions) {
-	const { messages, mode, onText, onFinish, abortSignal, provider, model: modelName, apiKey } = options;
-
-	const model = createModel(
+	const {
+		messages,
+		mode,
+		onText,
+		onFinish,
+		abortSignal,
 		provider,
+		model: modelName,
 		apiKey,
-		modelName,
-	);
+	} = options;
+
+	const model = createModel(provider, apiKey, modelName);
 	const system = buildSystemPrompt({ mode });
 	const tools = getToolForMode(mode);
 
@@ -87,11 +92,7 @@ export async function chat(options: ChatOptions) {
 	return chatResult;
 }
 
-function createModel(
-	provider: string,
-	apiKey: string,
-	modelName: string,
-) {
+function createModel(provider: string, apiKey: string, modelName: string) {
 	switch (provider) {
 		case "openai": {
 			const openai = createOpenAI({ apiKey });

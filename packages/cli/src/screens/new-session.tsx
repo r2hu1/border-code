@@ -44,7 +44,7 @@ export default function NewSession() {
 					messages: [
 						{
 							role: "user",
-              content: state.message,
+							content: state.message,
 							mode: state.mode,
 						},
 					],

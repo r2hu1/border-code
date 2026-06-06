@@ -116,7 +116,10 @@ export default function Session() {
 			model ?? "",
 			apiKey ?? "",
 			(m) => setSessionData((prev) => (prev ? { ...prev, messages: m } : prev)),
-			() => { busyRef.current = false; abortRef.current = null; },
+			() => {
+				busyRef.current = false;
+				abortRef.current = null;
+			},
 			(err) => {
 				busyRef.current = false;
 				abortRef.current = null;
@@ -176,8 +179,12 @@ export default function Session() {
 				currentProvider,
 				currentModel,
 				currentApiKey,
-				(m) => setSessionData((prev) => (prev ? { ...prev, messages: m } : prev)),
-				() => { busyRef.current = false; abortRef.current = null; },
+				(m) =>
+					setSessionData((prev) => (prev ? { ...prev, messages: m } : prev)),
+				() => {
+					busyRef.current = false;
+					abortRef.current = null;
+				},
 				(err) => {
 					busyRef.current = false;
 					abortRef.current = null;
@@ -195,7 +202,11 @@ export default function Session() {
 	const loading = !sessionData || busyRef.current;
 
 	return (
-		<SessionShell onSubmit={handleSubmit} inputDisabled={loading} loading={loading}>
+		<SessionShell
+			onSubmit={handleSubmit}
+			inputDisabled={loading}
+			loading={loading}
+		>
 			{sessionData?.messages.map((msg, i) => {
 				switch (msg.role) {
 					case "user":

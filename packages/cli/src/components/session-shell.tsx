@@ -52,7 +52,8 @@ export function SessionShell({
 					{loading ? (
 						<>
 							<Loader mode={mode} />
-              <text>esc</text><text fg={colors.dimSeparator}>interrupt</text>
+							<text>esc</text>
+							<text fg={colors.dimSeparator}>interrupt</text>
 						</>
 					) : (
 						<text fg={colors.dimSeparator}>~{process.cwd()}</text>

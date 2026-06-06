@@ -1,36 +1,96 @@
-import { marked } from "marked";
-import type { Token, Tokens } from "marked";
+import { marked, type Token, type Tokens } from "marked";
 import { TextAttributes } from "@opentui/core";
 import { EmptyBorder } from "../border";
 import { useTheme } from "../../providers/theme";
 
-function flattenTokens(tokens: Token[]): string {
-	let out = "";
+type InlineSegment = { text: string; bold?: boolean; italic?: boolean; dim?: boolean };
+
+function inlineSegments(tokens: Token[]): InlineSegment[] {
+	const out: InlineSegment[] = [];
 	for (const tok of tokens) {
 		switch (tok.type) {
-			case "text":
+			case "strong": {
+				const inner = inlineSegments((tok as Tokens.Strong).tokens ?? []);
+				for (const s of inner) out.push({ ...s, bold: true });
+				break;
+			}
+			case "em": {
+				const inner = inlineSegments((tok as Tokens.Em).tokens ?? []);
+				for (const s of inner) out.push({ ...s, italic: true });
+				break;
+			}
+			case "del": {
+				const inner = inlineSegments((tok as Tokens.Del).tokens ?? []);
+				for (const s of inner) out.push({ ...s, dim: true });
+				break;
+			}
 			case "codespan":
-			case "escape":
-				out += (tok as Tokens.Text | Tokens.Codespan | Tokens.Escape).text;
+				out.push({ text: ` ${(tok as Tokens.Codespan).text} `, dim: true });
 				break;
-			case "strong":
-			case "em":
-			case "del":
-				out += flattenTokens((tok as Tokens.Strong | Tokens.Em | Tokens.Del).tokens);
+			case "link": {
+				const inner = inlineSegments((tok as Tokens.Link).tokens ?? []);
+				for (const s of inner) out.push({ ...s });
 				break;
-			case "link":
-				out += flattenTokens((tok as Tokens.Link).tokens);
-				break;
+			}
 			case "br":
-				out += "\n";
+				out.push({ text: "\n" });
+				break;
+			case "escape":
+				out.push({ text: (tok as Tokens.Escape).text });
+				break;
+			case "text": {
+				const t = tok as Tokens.Text;
+				if (t.tokens) {
+					out.push(...inlineSegments(t.tokens));
+				} else {
+					out.push({ text: t.text });
+				}
+				break;
+			}
+			default:
+				if ("raw" in tok) out.push({ text: (tok as any).raw });
 				break;
 		}
 	}
 	return out;
 }
 
-function isTokensArray(t: unknown): t is Token[] {
-	return Array.isArray(t) && t.length > 0 && typeof (t[0] as Record<string, unknown>).type === "string";
+function flatText(tokens: Token[]): string {
+	return inlineSegments(tokens).map((s) => s.text).join("");
+}
+
+function listItemText(item: Tokens.ListItem): string {
+	return item.tokens.map((tok) => {
+		if (tok.type === "text") {
+			const t = tok as Tokens.Text;
+			return t.tokens ? flatText(t.tokens) : t.text;
+		}
+		if (tok.type === "paragraph") return flatText((tok as Tokens.Paragraph).tokens);
+		return "";
+	}).join("");
+}
+
+function InlineSegments({ tokens }: { tokens: Token[] }) {
+	const { colors } = useTheme();
+	const segments = inlineSegments(tokens);
+	return (
+		<box flexDirection="row" flexWrap="wrap" gap={0}>
+			{segments.map((seg, i) => {
+				let attrs = 0;
+				if (seg.bold) attrs |= TextAttributes.BOLD;
+				if (seg.italic) attrs |= TextAttributes.ITALIC;
+				return (
+					<text
+						key={i}
+						attributes={attrs || undefined}
+						fg={seg.dim ? colors.dimSeparator : undefined}
+					>
+						{seg.text}
+					</text>
+				);
+			})}
+		</box>
+	);
 }
 
 export function Markdown({ content }: { content: string }) {
@@ -41,81 +101,55 @@ export function Markdown({ content }: { content: string }) {
 		<box flexDirection="column" width="100%" gap={1}>
 			{tokens.map((token, i) => {
 				switch (token.type) {
+					case "heading": {
+						const t = token as Tokens.Heading;
+						return (
+							<text key={i} attributes={TextAttributes.BOLD}>
+								{flatText(t.tokens)}
+							</text>
+						);
+					}
+					case "paragraph": {
+						const t = token as Tokens.Paragraph;
+						return (
+							<box key={i} flexDirection="column" width="100%" gap={0}>
+								<InlineSegments tokens={t.tokens} />
+							</box>
+						);
+					}
 					case "code": {
-						const codeToken = token as Tokens.Code;
+						const t = token as Tokens.Code;
 						return (
 							<box
 								key={i}
 								flexDirection="column"
 								width="100%"
-								gap={0}
 								border={["left"]}
 								borderColor={colors.dimSeparator}
-								customBorderChars={{
-									...EmptyBorder,
-									vertical: "┃",
-								}}
+								customBorderChars={{ ...EmptyBorder, vertical: "┃" }}
 							>
-								<box paddingX={1} paddingY={0}>
-									<text>{codeToken.text}</text>
+								<box paddingX={1}>
+									<text fg={colors.thinking}>{t.text}</text>
 								</box>
 							</box>
 						);
 					}
-
-					case "heading": {
-						const headingToken = token as Tokens.Heading;
-						return (
-							<text key={i} attributes={TextAttributes.BOLD}>
-								{flattenTokens(headingToken.tokens)}
-							</text>
-						);
-					}
-
-					case "paragraph": {
-						const paraToken = token as Tokens.Paragraph;
-						return (
-							<text key={i}>{flattenTokens(paraToken.tokens)}</text>
-						);
-					}
-
-					case "list": {
-						const listToken = token as Tokens.List;
-						return (
-							<box key={i} flexDirection="column" width="100%" gap={0}>
-								{listToken.items.map((item, j) => {
-									const listItem = item as Tokens.ListItem;
-									const text = isTokensArray(listItem.tokens)
-										? flattenTokens(listItem.tokens)
-										: listItem.text;
-									return <text key={j}>  • {text}</text>;
-								})}
-							</box>
-						);
-					}
-
 					case "blockquote": {
-						const quoteToken = token as Tokens.Blockquote;
-						if (!isTokensArray(quoteToken.tokens)) return null;
+						const t = token as Tokens.Blockquote;
 						return (
 							<box
 								key={i}
 								flexDirection="column"
 								width="100%"
-								gap={0}
 								border={["left"]}
 								borderColor={colors.dimSeparator}
-								customBorderChars={{
-									...EmptyBorder,
-									vertical: "┃",
-								}}
+								customBorderChars={{ ...EmptyBorder, vertical: "┃" }}
 							>
-								{quoteToken.tokens.map((t, j) => {
-									if (t.type === "paragraph") {
-										const p = t as Tokens.Paragraph;
+								{t.tokens.map((inner, j) => {
+									if (inner.type === "paragraph") {
 										return (
 											<box key={j} paddingX={1}>
-												<text>{flattenTokens(p.tokens)}</text>
+												<InlineSegments tokens={(inner as Tokens.Paragraph).tokens} />
 											</box>
 										);
 									}
@@ -124,15 +158,32 @@ export function Markdown({ content }: { content: string }) {
 							</box>
 						);
 					}
-
-					case "hr": {
+					case "list": {
+						const t = token as Tokens.List;
+						return (
+							<box key={i} flexDirection="column" width="100%" gap={0}>
+								{t.items.map((item, j) => {
+									const bullet = t.ordered ? `${j + 1}.` : "•";
+									const checkbox = item.task
+										? (item.checked ? "✓ " : "☐ ")
+										: "";
+									return (
+										<text key={j} fg={colors.dimSeparator}>
+											{"  "}{bullet}{" "}{checkbox}{listItemText(item)}
+										</text>
+									);
+								})}
+							</box>
+						);
+					}
+					case "hr":
 						return (
 							<text key={i} fg={colors.dimSeparator}>
 								{"─".repeat(48)}
 							</text>
 						);
-					}
-
+					case "space":
+						return null;
 					default:
 						return null;
 				}

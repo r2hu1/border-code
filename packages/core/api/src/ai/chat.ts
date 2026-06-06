@@ -8,13 +8,27 @@ import { buildSystemPrompt } from "./system-prompt";
 import { getToolForMode } from "./tools";
 import type { ModeType } from "@border-code/shared";
 
+export type ToolCallData = {
+	toolName: string;
+	args: Record<string, unknown>;
+	result?: unknown;
+};
+
+export type ChatResult = {
+	text: string;
+	reasoning?: string;
+	toolCalls: ToolCallData[];
+};
+
 export type ChatOptions = {
 	messages: Array<ModelMessage>;
 	mode: ModeType;
+	onText?: (chunk: string) => void;
+	onFinish?: (result: ChatResult) => void | Promise<void>;
 };
 
 export async function chat(options: ChatOptions) {
-	const { messages, mode } = options;
+	const { messages, mode, onText, onFinish } = options;
 	const config = await getConfig();
 
 	if (!config) {
@@ -29,12 +43,44 @@ export async function chat(options: ChatOptions) {
 	const system = buildSystemPrompt({ mode });
 	const tools = getToolForMode(mode);
 
-	return streamText({
+	const result = streamText({
 		model,
 		system,
 		messages,
 		...tools,
 	});
+
+	let fullText = "";
+	if (onText) {
+		for await (const chunk of result.textStream) {
+			fullText += chunk;
+			onText(chunk);
+		}
+	}
+
+	const [reasoningText, rawToolCalls, rawToolResults] = await Promise.all([
+		result.reasoningText,
+		result.toolCalls,
+		result.toolResults,
+	]);
+
+	const toolCalls: ToolCallData[] = rawToolCalls.map(
+		(tc: unknown, i: number) => {
+			const call = tc as { toolName: string; args: Record<string, unknown> };
+			const res = rawToolResults[i] as { result?: unknown } | undefined;
+			return { toolName: call.toolName, args: call.args, result: res?.result };
+		},
+	);
+
+	const chatResult: ChatResult = {
+		text: onText ? fullText : (await result.text),
+		reasoning: reasoningText ?? undefined,
+		toolCalls,
+	};
+
+	await onFinish?.(chatResult);
+
+	return chatResult;
 }
 
 function createModel(

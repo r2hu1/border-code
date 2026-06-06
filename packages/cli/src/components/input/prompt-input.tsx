@@ -13,7 +13,7 @@ import { useKeyboardLayer } from "../../providers/config/keyboard";
 import { useKeyboard } from "@opentui/react";
 
 type Props = {
-	onSubmit: (text: string) => void;
+	onSubmit: (text: string) => void | Promise<void>;
 	disabled?: boolean;
 };
 
@@ -30,8 +30,13 @@ export default function PromptInput({ onSubmit, disabled }: Props) {
 	const textareaRef = useRef<TextareaRenderable>(null);
 	const { open } = useDialog();
 
-	const handleOnSubmit = () => {
-		onSubmit(textareaRef.current?.plainText ?? "");
+	const handleOnSubmit = async () => {
+		const text = textareaRef.current?.plainText ?? "";
+		if (!text) return;
+		try {
+			await onSubmit(text);
+			textareaRef.current?.clear();
+		} catch {}
 	};
 
 	useKeyboard((key) => {

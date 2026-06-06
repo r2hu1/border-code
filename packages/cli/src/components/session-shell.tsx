@@ -7,7 +7,7 @@ import { useTheme } from "../providers/theme";
 
 type Props = {
 	children?: ReactNode;
-	onSubmit: (text: string) => void;
+	onSubmit: (text: string) => void | Promise<void>;
 	inputDisabled?: boolean;
 	loading?: boolean;
 	interruptible?: boolean;

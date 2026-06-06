@@ -10,6 +10,7 @@ import {
 	type Provider,
 } from "@border-code/core-api";
 import { useToast } from "../../../providers/toast";
+import { useConfig } from "../../../providers/config/config";
 import { usePromptConfig } from "../../../providers/config/prompt-config";
 
 export const SelectModalDialogContent = () => {
@@ -18,6 +19,7 @@ export const SelectModalDialogContent = () => {
 	const [models, setModels] = useState<string[]>([]);
 	const [loading, setLoading] = useState(true);
 	const { setModel, model } = usePromptConfig();
+	const { refresh } = useConfig();
 
 	useEffect(() => {
 		const fetchAndUpdateModels = async () => {
@@ -46,12 +48,13 @@ export const SelectModalDialogContent = () => {
 			try {
 				await updateConfig({ model: item });
 				setModel(item);
+				refresh();
 				show({ message: `Using ${item}`, variant: "success" });
 			} catch (error) {
 				show({ message: "Failed to update model", variant: "error" });
 			}
 		},
-		[dialog],
+		[dialog, refresh],
 	);
 
 	return (

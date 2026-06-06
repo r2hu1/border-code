@@ -2,14 +2,9 @@ import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { TextAttributes, RGBA } from "@opentui/core";
 import { useKeyboard, useTerminalDimensions } from "@opentui/react";
-import type { DialogConfig } from "./types";
+import type { DialogConfig, DialogContextValue } from "./types";
 import { useKeyboardLayer } from "../config/keyboard";
 import { useTheme } from "../theme";
-
-export type DialogContextValue = {
-	open: (config: DialogConfig) => void;
-	close: () => void;
-};
 
 const DialogContext = createContext<DialogContextValue | null>(null);
 
@@ -48,6 +43,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
 	const value: DialogContextValue = {
 		open,
 		close,
+		isOpen: currentDialog !== null,
 	};
 
 	return (

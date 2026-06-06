@@ -28,7 +28,15 @@ export default function PromptInput({ onSubmit, disabled }: Props) {
 	const { colors } = useTheme();
 	const { mode, setMode } = usePromptConfig();
 	const textareaRef = useRef<TextareaRenderable>(null);
-	const { open } = useDialog();
+	const { open, isOpen } = useDialog();
+	const wasDialogOpen = useRef(false);
+
+	useEffect(() => {
+		if (wasDialogOpen.current && !isOpen) {
+			textareaRef.current?.focus();
+		}
+		wasDialogOpen.current = isOpen;
+	}, [isOpen]);
 
 	const handleOnSubmit = async () => {
 		const text = textareaRef.current?.plainText ?? "";

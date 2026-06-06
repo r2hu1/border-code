@@ -3,7 +3,6 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
-import { getConfig } from "../config";
 import { buildSystemPrompt } from "./system-prompt";
 import { getToolForMode } from "./tools";
 import type { ModeType } from "@border-code/shared";
@@ -25,20 +24,19 @@ export type ChatOptions = {
 	mode: ModeType;
 	onText?: (chunk: string) => void;
 	onFinish?: (result: ChatResult) => void | Promise<void>;
+	abortSignal?: AbortSignal;
+	provider: string;
+	model: string;
+	apiKey: string;
 };
 
 export async function chat(options: ChatOptions) {
-	const { messages, mode, onText, onFinish } = options;
-	const config = await getConfig();
-
-	if (!config) {
-		throw new Error("No config found");
-	}
+	const { messages, mode, onText, onFinish, abortSignal, provider, model: modelName, apiKey } = options;
 
 	const model = createModel(
-		config.provider ?? "",
-		config.apiKey ?? "",
-		config.model ?? "",
+		provider,
+		apiKey,
+		modelName,
 	);
 	const system = buildSystemPrompt({ mode });
 	const tools = getToolForMode(mode);
@@ -52,6 +50,7 @@ export async function chat(options: ChatOptions) {
 
 	const result = await agent.stream({
 		messages,
+		abortSignal,
 	});
 
 	let fullText = "";

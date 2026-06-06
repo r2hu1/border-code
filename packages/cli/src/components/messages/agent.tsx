@@ -39,13 +39,7 @@ export function AgentMessage({ message }: Props) {
 	return (
 		<box width="100%" alignItems="center">
 			<box
-				border={["left"]}
-				borderColor={colors.primary}
 				width="100%"
-				customBorderChars={{
-					...EmptyBorder,
-					...SplitBorderChars,
-				}}
 			>
 				<box
 					flexDirection="column"

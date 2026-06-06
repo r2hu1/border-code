@@ -1,29 +1,20 @@
-import z from "zod";
-import { modeSchema } from "../../../shared/src/config";
-import { useNavigate, useLocation, useParams } from "react-router";
-import { useToast } from "../providers/toast";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router";
+import { useEffect, useRef, useState } from "react";
 import { SessionShell } from "../components/session-shell";
 import { UserMessage, AgentMessage } from "../components/messages";
 import {
-	createSession,
 	getSessionById,
+	updateSession,
+	chat,
 	type Session,
+	type ToolCall,
 } from "@border-code/core-api";
-import { useConfig } from "../providers/config/config";
-import { usePromptConfig } from "../providers/config/prompt-config";
-
-const sessionStateSchema = z.object({
-	message: z.string(),
-	mode: modeSchema,
-});
 
 export default function Session() {
 	const { id } = useParams();
-	const location = useLocation();
-	const toast = useToast();
-	const { mode, model } = usePromptConfig();
 	const [sessionData, setSessionData] = useState<Session | null>(null);
+	const [isChatting, setIsChatting] = useState(false);
+	const chatTriggeredRef = useRef(false);
 
 	useEffect(() => {
 		const fetchSessionData = async () => {
@@ -36,8 +27,81 @@ export default function Session() {
 		fetchSessionData();
 	}, [id]);
 
+	useEffect(() => {
+		if (!sessionData || chatTriggeredRef.current) return;
+
+		const messages = sessionData.messages;
+		const lastMsg = messages[messages.length - 1];
+		if (!lastMsg || lastMsg.role !== "user") return;
+
+		chatTriggeredRef.current = true;
+		setIsChatting(true);
+
+		const runChat = async () => {
+			try {
+				const result = await chat({
+					messages: messages.map((m) => ({
+						role: m.role === "agent" ? "assistant" : "user",
+						content: m.content,
+					})),
+					mode: lastMsg.mode,
+				});
+
+				const [text, reasoningText, rawToolCalls, rawToolResults] =
+					await Promise.all([
+						result.text,
+						result.reasoningText,
+						result.toolCalls,
+						result.toolResults,
+					]);
+
+				const toolCalls: ToolCall[] = rawToolCalls.map(
+					(tc: unknown, i: number) => {
+						const call = tc as {
+							toolName: string;
+							args: Record<string, unknown>;
+						};
+						const res = rawToolResults[i] as
+							| { result?: unknown }
+							| undefined;
+						return {
+							toolName: call.toolName,
+							args: call.args,
+							result: res?.result,
+						};
+					},
+				);
+
+				const updated = await updateSession(id ?? "", {
+					messages: [
+						...messages,
+						{
+							role: "agent",
+							content: text,
+							mode: lastMsg.mode,
+							reasoning: reasoningText ?? undefined,
+							toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+						},
+					],
+				});
+
+				if (updated?.session) {
+					setSessionData(updated.session);
+				}
+			} catch (e) {
+				chatTriggeredRef.current = false;
+			} finally {
+				setIsChatting(false);
+			}
+		};
+
+		runChat();
+	}, [sessionData, id]);
+
+	const loading = !sessionData || isChatting;
+
 	return (
-		<SessionShell onSubmit={() => {}} inputDisabled>
+		<SessionShell onSubmit={() => {}} inputDisabled={loading} loading={loading}>
 			{sessionData?.messages.map((msg, i) => {
 				switch (msg.role) {
 					case "user":

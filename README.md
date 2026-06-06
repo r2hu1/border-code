@@ -23,24 +23,6 @@ An open-source on-device coding agent that runs entirely in your terminal.
 
 ## Install
 
-### macOS / Linux
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/r2hu1/border-code/main/scripts/install.sh | sh
-```
-
-### Windows (PowerShell)
-
-```powershell
-irm https://raw.githubusercontent.com/r2hu1/border-code/main/scripts/install.ps1 | iex
-```
-
-This downloads the latest release binary for your platform and adds it to your PATH. After installation, restart your terminal and run:
-
-```sh
-border-code
-```
-
 ## Quick Start (from source)
 
 ### Prerequisites

@@ -12,7 +12,8 @@ export interface Message {
 	content: string;
 	mode: ModeType;
 	reasoning?: string;
-	toolCalls?: ToolCall[];
+  toolCalls?: ToolCall[];
+	status?: "streaming" | "completed" | "error" | "aborted";
 }
 
 export const sessions = sqliteTable("sessions", {
@@ -22,7 +23,8 @@ export const sessions = sqliteTable("sessions", {
 	title: text("title").notNull(),
 	cwd: text("cwd").notNull(),
 	mode: text("mode").notNull().$type<ModeType>(),
-	messages: text("messages", { mode: "json" }).$type<Message[]>().notNull(),
+  messages: text("messages", { mode: "json" }).$type<Message[]>().notNull(),
+	status: text("status").$type<"streaming" | "completed" | "error" | "aborted">(),
 	createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 	updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });

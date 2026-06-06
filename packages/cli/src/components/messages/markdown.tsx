@@ -168,7 +168,7 @@ export function Markdown({ content }: { content: string }) {
 										? (item.checked ? "✓ " : "☐ ")
 										: "";
 									return (
-										<text key={j} fg={colors.dimSeparator}>
+										<text key={j}>
 											{"  "}{bullet}{" "}{checkbox}{listItemText(item)}
 										</text>
 									);

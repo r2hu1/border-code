@@ -32,14 +32,15 @@ async function streamResponse(
 
 	let finished = false;
 
-	const finish = async (text: string, reason?: string) => {
+	const finish = async (text: string, reasoning?: string, toolCalls?: Message["toolCalls"]) => {
 		if (finished) return;
 		finished = true;
 		const final: Message = {
 			role: "agent",
 			content: text,
 			mode,
-			reasoning: reason,
+			reasoning,
+			toolCalls: toolCalls ?? agentMsg.toolCalls,
 		};
 		const allMessages = [...messages, final];
 		await updateSession(id, { messages: allMessages });
@@ -67,13 +68,13 @@ async function streamResponse(
 				onUpdate([...messages, { ...agentMsg }]);
 			},
 			onFinish: async (result) => {
-				await finish(result.text, result.reasoning);
+				await finish(result.text, result.reasoning, result.toolCalls.length ? result.toolCalls : agentMsg.toolCalls);
 			},
 			onError(error) {
 				if (finished) return;
 				finished = true;
 				agentMsg.content = error.message;
-				onUpdate([...messages, agentMsg]);
+				onUpdate([...messages, { ...agentMsg }]);
 				onDone();
 				onToast(error.message);
 				updateSession(id, { messages: [...messages, agentMsg] });
@@ -81,10 +82,10 @@ async function streamResponse(
 		});
 	} catch (err) {
 		if (err instanceof Error && err.name === "AbortError") {
-			await finish(agentMsg.content);
+			await finish(agentMsg.content, undefined, agentMsg.toolCalls);
 		} else {
 			const msg = err instanceof Error ? err.message : "An unexpected error occurred";
-			await finish(msg);
+			await finish(msg, undefined, agentMsg.toolCalls);
 			onToast(msg);
 		}
 	}

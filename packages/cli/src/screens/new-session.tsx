@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef } from "react";
 import { SessionShell } from "../components/session-shell";
 import { UserMessage } from "../components/messages";
 import { createSession } from "@border-code/core-api";
-import { useConfig } from "../providers/config/config";
 
 const newSessionStateSchema = z.object({
 	message: z.string(),
@@ -18,7 +17,6 @@ export default function NewSession() {
 	const location = useLocation();
 	const toast = useToast();
 	const hasStartedRef = useRef(false);
-	const { model } = useConfig();
 
 	const state = useMemo(() => {
 		const parsed = newSessionStateSchema.safeParse(location.state);
@@ -42,7 +40,6 @@ export default function NewSession() {
 				const res = await createSession({
 					title: state.message.slice(0, 200),
 					cwd: process.cwd(),
-					model: model ?? "",
 					mode: state.mode,
 					messages: [
 						{

@@ -28,13 +28,11 @@ export async function getSessionById(id: string) {
 export async function createSession({
 	title,
 	cwd,
-	model,
 	mode,
 	messages,
 }: {
 	title: string;
 	cwd: string;
-	model: string;
 	mode: ModeType;
 	messages: Message[];
 }) {
@@ -43,7 +41,6 @@ export async function createSession({
 		.values({
 			title,
 			cwd,
-			model,
 			mode,
 			messages,
 			createdAt: new Date(),
@@ -62,13 +59,11 @@ export async function updateSession(
 	{
 		title,
 		cwd,
-		model,
 		mode,
 		messages,
 	}: {
 		title?: string;
 		cwd?: string;
-		model?: string;
 		mode?: ModeType;
 		messages?: Message[];
 	},
@@ -76,7 +71,6 @@ export async function updateSession(
 	const updates: {
 		title?: string;
 		cwd?: string;
-		model?: string;
 		mode?: ModeType;
 		messages?: Message[];
 		updatedAt: Date;
@@ -86,7 +80,6 @@ export async function updateSession(
 
 	if (title !== undefined) updates.title = title;
 	if (cwd !== undefined) updates.cwd = cwd;
-	if (model !== undefined) updates.model = model;
 	if (mode !== undefined) updates.mode = mode;
 	if (messages !== undefined) updates.messages = messages;
 

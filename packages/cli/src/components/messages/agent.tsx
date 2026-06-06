@@ -32,6 +32,13 @@ function ReasoningBlock({ reasoning }: { reasoning: string }) {
 	);
 }
 
+function summarizeResult(result: unknown): string {
+	const text = typeof result === "string" ? result : JSON.stringify(result);
+	const words = text.split(/\s+/).filter(Boolean);
+	const preview = words.slice(0, 30).join(" ");
+	return words.length > 30 ? preview + "..." : preview;
+}
+
 function ToolCalls({ message }: { message: Message }) {
 	const { colors } = useTheme();
 
@@ -40,19 +47,10 @@ function ToolCalls({ message }: { message: Message }) {
 	return (
 		<box flexDirection="column" width="100%" gap={0}>
 			{message.toolCalls.map((tc, i) => (
-				<box key={i} flexDirection="column" width="100%" gap={0}>
-					<text fg={colors.dimSeparator}>
-						── Tool: {tc.toolName} ──
-					</text>
-					<text fg={colors.dimSeparator}>
-						{JSON.stringify(tc.args)}
-					</text>
-					{tc.result !== undefined ? (
-						<text fg={colors.dimSeparator}>
-							→ {JSON.stringify(tc.result).slice(0, 200)}
-						</text>
-					) : null}
-				</box>
+				<text key={i} fg={colors.dimSeparator}>
+					Tool Call - {tc.toolName}
+					{tc.result !== undefined ? ` > ${summarizeResult(tc.result)}` : ""}
+				</text>
 			))}
 		</box>
 	);

@@ -41,6 +41,7 @@ export type ChatOptions = {
 	messages: Array<ModelMessage>;
 	mode: ModeType;
 	onText?: (chunk: string) => void;
+	onToolCall?: (toolCalls: ToolCallData[]) => void;
 	onFinish?: (result: ChatResult) => void | Promise<void>;
 	onError?: (error: ChatError) => void;
 	abortSignal?: AbortSignal;
@@ -186,9 +187,20 @@ export async function chat(options: ChatOptions) {
 		tools,
 		stopWhen: stepCountIs(25),
 		abortSignal,
+		onStepFinish({ toolCalls: stepToolCalls, toolResults: stepToolResults }) {
+			if (stepToolCalls.length === 0) return;
+			const calls: ToolCallData[] = stepToolCalls.map((tc, i) => ({
+				toolName: tc.toolName,
+				args: tc.input as Record<string, unknown>,
+				result: stepToolResults[i]?.output,
+			}));
+			onToolCall?.(calls);
+		},
 	});
 
 	let fullText = "";
+	const allToolCalls: ToolCallData[] = [];
+
 	try {
 		for await (const chunk of result.textStream) {
 			fullText += chunk;
@@ -211,11 +223,10 @@ export async function chat(options: ChatOptions) {
 		result.steps,
 	]);
 
-	const toolCalls: ToolCallData[] = [];
 	for (const step of steps) {
 		step.toolCalls.forEach((tc, i) => {
 			const tr = step.toolResults[i];
-			toolCalls.push({
+			allToolCalls.push({
 				toolName: tc.toolName,
 				args: tc.input as Record<string, unknown>,
 				result: tr?.output,
@@ -226,7 +237,7 @@ export async function chat(options: ChatOptions) {
 	const chatResult: ChatResult = {
 		text: fullText,
 		reasoning: reasoningParts.map((r) => r.text).join("\n") || undefined,
-		toolCalls,
+		toolCalls: allToolCalls,
 	};
 
 	await onFinish?.(chatResult);

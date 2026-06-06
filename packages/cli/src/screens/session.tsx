@@ -62,6 +62,10 @@ async function streamResponse(
 				agentMsg.content += chunk;
 				onUpdate([...messages, { ...agentMsg }]);
 			},
+			onToolCall(calls) {
+				agentMsg.toolCalls = [...(agentMsg.toolCalls ?? []), ...calls];
+				onUpdate([...messages, { ...agentMsg }]);
+			},
 			onFinish: async (result) => {
 				await finish(result.text, result.reasoning);
 			},

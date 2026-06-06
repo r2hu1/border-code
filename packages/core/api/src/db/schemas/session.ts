@@ -1,10 +1,18 @@
 import type { ModeType } from "@border-code/shared";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+export interface ToolCall {
+	toolName: string;
+	args: Record<string, unknown>;
+	result?: unknown;
+}
+
 export interface Message {
 	role: "user" | "agent";
 	content: string;
 	mode: ModeType;
+	reasoning?: string;
+	toolCalls?: ToolCall[];
 }
 
 export const sessions = sqliteTable("sessions", {

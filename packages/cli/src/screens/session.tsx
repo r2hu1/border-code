@@ -4,7 +4,7 @@ import { useNavigate, useLocation, useParams } from "react-router";
 import { useToast } from "../providers/toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SessionShell } from "../components/session-shell";
-import { UserMessage } from "../components/messages";
+import { UserMessage, AgentMessage } from "../components/messages";
 import {
 	createSession,
 	getSessionById,
@@ -45,7 +45,7 @@ export default function Session() {
 							<UserMessage key={i} message={msg.content} mode={msg.mode} />
 						);
 					case "agent":
-						return <text>{msg.content}</text>;
+						return <AgentMessage key={i} message={msg} />;
 					default:
 						return null;
 				}

@@ -1,7 +1,6 @@
 # Border Code
 
 An open-source on-device coding agent that runs entirely in your terminal.
-
 ![Preview](assets/prev.png)
 
 ## Features
@@ -22,7 +21,27 @@ An open-source on-device coding agent that runs entirely in your terminal.
 - **Remote control** — manage Border Code from your phone or tablet via a web API
 - **Web session** — expose the agent interface as a web app for browser-based use
 
-## Quick Start
+## Install
+
+### macOS / Linux
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/r2hu1/border-code/main/scripts/install.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/r2hu1/border-code/main/scripts/install.ps1 | iex
+```
+
+This downloads the latest release binary for your platform and adds it to your PATH. After installation, restart your terminal and run:
+
+```sh
+border-code
+```
+
+## Quick Start (from source)
 
 ### Prerequisites
 

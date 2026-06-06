@@ -1,23 +1,25 @@
 import { marked } from "marked";
+import type { Token, Tokens } from "marked";
 import { TextAttributes } from "@opentui/core";
 import { EmptyBorder } from "../border";
 import { useTheme } from "../../providers/theme";
 
-function flattenTokens(tokens: marked.Token[]): string {
+function flattenTokens(tokens: Token[]): string {
 	let out = "";
 	for (const tok of tokens) {
 		switch (tok.type) {
 			case "text":
 			case "codespan":
-				out += "text" in tok ? tok.text : "";
+			case "escape":
+				out += (tok as Tokens.Text | Tokens.Codespan | Tokens.Escape).text;
 				break;
 			case "strong":
 			case "em":
 			case "del":
-				out += flattenTokens(tok.tokens);
+				out += flattenTokens((tok as Tokens.Strong | Tokens.Em | Tokens.Del).tokens);
 				break;
 			case "link":
-				out += flattenTokens(tok.tokens);
+				out += flattenTokens((tok as Tokens.Link).tokens);
 				break;
 			case "br":
 				out += "\n";
@@ -25,6 +27,10 @@ function flattenTokens(tokens: marked.Token[]): string {
 		}
 	}
 	return out;
+}
+
+function isTokensArray(t: unknown): t is Token[] {
+	return Array.isArray(t) && t.length > 0 && typeof (t[0] as Record<string, unknown>).type === "string";
 }
 
 export function Markdown({ content }: { content: string }) {
@@ -36,6 +42,7 @@ export function Markdown({ content }: { content: string }) {
 			{tokens.map((token, i) => {
 				switch (token.type) {
 					case "code": {
+						const codeToken = token as Tokens.Code;
 						return (
 							<box
 								key={i}
@@ -50,37 +57,46 @@ export function Markdown({ content }: { content: string }) {
 								}}
 							>
 								<box paddingX={1} paddingY={0}>
-									<text>{token.text}</text>
+									<text>{codeToken.text}</text>
 								</box>
 							</box>
 						);
 					}
 
 					case "heading": {
+						const headingToken = token as Tokens.Heading;
 						return (
 							<text key={i} attributes={TextAttributes.BOLD}>
-								{flattenTokens(token.tokens)}
+								{flattenTokens(headingToken.tokens)}
 							</text>
 						);
 					}
 
 					case "paragraph": {
+						const paraToken = token as Tokens.Paragraph;
 						return (
-							<text key={i}>{flattenTokens(token.tokens)}</text>
+							<text key={i}>{flattenTokens(paraToken.tokens)}</text>
 						);
 					}
 
 					case "list": {
+						const listToken = token as Tokens.List;
 						return (
 							<box key={i} flexDirection="column" width="100%" gap={0}>
-								{token.items.map((item, j) => (
-									<text key={j}>  • {flattenTokens(item.tokens)}</text>
-								))}
+								{listToken.items.map((item, j) => {
+									const listItem = item as Tokens.ListItem;
+									const text = isTokensArray(listItem.tokens)
+										? flattenTokens(listItem.tokens)
+										: listItem.text;
+									return <text key={j}>  • {text}</text>;
+								})}
 							</box>
 						);
 					}
 
 					case "blockquote": {
+						const quoteToken = token as Tokens.Blockquote;
+						if (!isTokensArray(quoteToken.tokens)) return null;
 						return (
 							<box
 								key={i}
@@ -94,11 +110,12 @@ export function Markdown({ content }: { content: string }) {
 									vertical: "┃",
 								}}
 							>
-								{token.tokens.map((t, j) => {
+								{quoteToken.tokens.map((t, j) => {
 									if (t.type === "paragraph") {
+										const p = t as Tokens.Paragraph;
 										return (
 											<box key={j} paddingX={1}>
-												<text>{flattenTokens(t.tokens)}</text>
+												<text>{flattenTokens(p.tokens)}</text>
 											</box>
 										);
 									}
@@ -110,7 +127,7 @@ export function Markdown({ content }: { content: string }) {
 
 					case "hr": {
 						return (
-							<text key={i} color={colors.dimSeparator}>
+							<text key={i} fg={colors.dimSeparator}>
 								{"─".repeat(48)}
 							</text>
 						);

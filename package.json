@@ -19,6 +19,7 @@
 		"better-sqlite3": "^12.10.0",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
+		"ora": "^9.4.0",
 		"react-router": "^7"
 	}
 }

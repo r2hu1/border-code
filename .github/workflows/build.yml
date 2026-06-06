@@ -48,7 +48,8 @@ jobs:
             OUT="border-code-windows-x64.exe"
           fi
 
-          bun build packages/cli/src/index.tsx --compile --target=$TARGET --outfile=$OUT
+          bun build packages/cli/src/index.tsx --compile --target=$TARGET --outfile=$OUT || exit 1
+          ls -lh $OUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -60,6 +61,7 @@ jobs:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
+    if: success()
 
     steps:
       - name: Download artifacts
@@ -69,8 +71,9 @@ jobs:
 
       - name: Flatten files
         run: |
-          mkdir release
+          mkdir -p release
           find dist -type f -exec mv {} release/ \;
+          rm -rf dist
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

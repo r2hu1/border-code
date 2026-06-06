@@ -20,6 +20,7 @@
 		"@border-code/shared": "workspace:**",
 		"@opentui/core": "^0.3.0",
 		"@opentui/react": "^0.3.0",
+		"marked": "^17.0.1",
 		"opentui-spinner": "^0.0.6",
 		"pretty-ms": "^9.3.0",
 		"react": "^19.2.6",

@@ -1,4 +1,4 @@
-import { ToolLoopAgent, stepCountIs, type ModelMessage } from "ai";
+import { streamText, stepCountIs, type ModelMessage } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
@@ -46,15 +46,12 @@ export async function chat(options: ChatOptions) {
 	const system = buildSystemPrompt({ mode });
 	const tools = getToolForMode(mode);
 
-	const agent = new ToolLoopAgent({
+	const result = streamText({
 		model,
-		instructions: system,
+		system,
+		messages,
 		tools,
 		stopWhen: stepCountIs(25),
-	});
-
-	const result = await agent.stream({
-		messages,
 		abortSignal,
 	});
 

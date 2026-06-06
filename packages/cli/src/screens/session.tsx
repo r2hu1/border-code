@@ -24,13 +24,17 @@ async function streamResponse(
 	apiKey: string,
 	onUpdate: (messages: Message[]) => void,
 	onDone: () => void,
-	onError: (error?: Error) => void,
+	onToast: (message: string) => void,
 	abortSignal?: AbortSignal,
 ) {
 	const agentMsg: Message = { role: "agent", content: "", mode };
 	onUpdate([...messages, agentMsg]);
 
+	let finished = false;
+
 	const finish = async (text: string, reason?: string) => {
+		if (finished) return;
+		finished = true;
 		const final: Message = {
 			role: "agent",
 			content: text,
@@ -61,13 +65,23 @@ async function streamResponse(
 			onFinish: async (result) => {
 				await finish(result.text, result.reasoning);
 			},
+			onError(error) {
+				if (finished) return;
+				finished = true;
+				agentMsg.content = error.message;
+				onUpdate([...messages, agentMsg]);
+				onDone();
+				onToast(error.message);
+				updateSession(id, { messages: [...messages, agentMsg] });
+			},
 		});
 	} catch (err) {
 		if (err instanceof Error && err.name === "AbortError") {
 			await finish(agentMsg.content);
 		} else {
-			onUpdate(messages);
-			onError(err instanceof Error ? err : undefined);
+			const msg = err instanceof Error ? err.message : "An unexpected error occurred";
+			await finish(msg);
+			onToast(msg);
 		}
 	}
 }
@@ -120,11 +134,11 @@ export default function Session() {
 				busyRef.current = false;
 				abortRef.current = null;
 			},
-			(err) => {
+			(errMsg) => {
 				busyRef.current = false;
 				abortRef.current = null;
 				show({
-					message: err?.message ?? "Failed to get response",
+					message: errMsg,
 					variant: "error",
 				});
 			},
@@ -185,11 +199,11 @@ export default function Session() {
 					busyRef.current = false;
 					abortRef.current = null;
 				},
-				(err) => {
+				(errMsg) => {
 					busyRef.current = false;
 					abortRef.current = null;
 					show({
-						message: err?.message ?? "Failed to get response",
+						message: errMsg,
 						variant: "error",
 					});
 				},

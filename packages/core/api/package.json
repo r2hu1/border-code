@@ -17,6 +17,7 @@
 		"@ai-sdk/google": "^3.0.80",
 		"@ai-sdk/mistral": "^3.0.37",
 		"@ai-sdk/openai": "^3.0.68",
+		"@ai-sdk/provider": "^3.0.10",
 		"@border-code/shared": "workspace:*",
 		"ai": "^6.0.197",
 		"better-sqlite3": "^12.10.0",

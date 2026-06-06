@@ -35,7 +35,7 @@ function ReasoningBlock({ reasoning }: { reasoning: string }) {
 function ToolCalls({ message }: { message: Message }) {
 	const { colors } = useTheme();
 
-	if (!message.toolCalls?.length) return null;
+	if (!message.toolCalls) return null;
 
 	return (
 		<box flexDirection="column" width="100%" gap={0}>
@@ -64,8 +64,9 @@ export function AgentMessage({ message }: Props) {
 	if (isStreaming(message)) {
 		return (
 			<box width="100%" alignItems="center">
-				<box width="100%" paddingX={2} paddingY={1}>
-					<Loader mode={message.mode} name="dots"/>
+				<box width="100%" paddingY={1} flexWrap="wrap" gap={1} flexGrow={1} flexDirection="row">
+          <Loader mode={message.mode} name="dots" />
+          <text>Thinking...</text>
 				</box>
 			</box>
 		);

@@ -1,4 +1,4 @@
-import { streamText, type ModelMessage } from "ai";
+import { ToolLoopAgent, stepCountIs, type ModelMessage } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
@@ -43,38 +43,43 @@ export async function chat(options: ChatOptions) {
 	const system = buildSystemPrompt({ mode });
 	const tools = getToolForMode(mode);
 
-	const result = streamText({
+	const agent = new ToolLoopAgent({
 		model,
-		system,
+		instructions: system,
+		tools,
+		stopWhen: stepCountIs(25),
+	});
+
+	const result = await agent.stream({
 		messages,
-		...tools,
 	});
 
 	let fullText = "";
-	if (onText) {
-		for await (const chunk of result.textStream) {
-			fullText += chunk;
-			onText(chunk);
-		}
+	for await (const chunk of result.textStream) {
+		fullText += chunk;
+		onText?.(chunk);
 	}
 
-	const [reasoningText, rawToolCalls, rawToolResults] = await Promise.all([
-		result.reasoningText,
-		result.toolCalls,
-		result.toolResults,
+	const [reasoningParts, steps] = await Promise.all([
+		result.reasoning,
+		result.steps,
 	]);
 
-	const toolCalls: ToolCallData[] = rawToolCalls.map(
-		(tc: unknown, i: number) => {
-			const call = tc as { toolName: string; args: Record<string, unknown> };
-			const res = rawToolResults[i] as { result?: unknown } | undefined;
-			return { toolName: call.toolName, args: call.args, result: res?.result };
-		},
-	);
+	const toolCalls: ToolCallData[] = [];
+	for (const step of steps) {
+		step.toolCalls.forEach((tc, i) => {
+			const tr = step.toolResults[i];
+			toolCalls.push({
+				toolName: tc.toolName,
+				args: tc.input as Record<string, unknown>,
+				result: tr?.output,
+			});
+		});
+	}
 
 	const chatResult: ChatResult = {
-		text: onText ? fullText : (await result.text),
-		reasoning: reasoningText ?? undefined,
+		text: fullText,
+		reasoning: reasoningParts.map((r) => r.text).join("\n") || undefined,
 		toolCalls,
 	};
 

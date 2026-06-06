@@ -1,25 +1,31 @@
 {
-	"name": "border-code",
-	"version": "1.0.0",
-	"workspaces": [
-		"packages/**"
-	],
-	"scripts": {
-		"format": "bunx --bun @biomejs/biome format --write",
-		"lint": "bunx --bun @biomejs/biome lint --write",
-		"dev:cli": "bun run --watch packages/cli/src/index.tsx",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:push": "drizzle-kit push"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.4.16"
-	},
-	"dependencies": {
-		"better-sqlite3": "^12.10.0",
-		"drizzle-kit": "^0.31.10",
-		"drizzle-orm": "^0.45.2",
-		"ora": "^9.4.0",
-		"react-router": "^7"
-	}
+  "name": "border-code",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/**"
+  ],
+  "scripts": {
+    "format": "bunx --bun @biomejs/biome format --write",
+    "lint": "bunx --bun @biomejs/biome lint --write",
+    "dev:cli": "bun run --watch packages/cli/src/index.tsx",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "build:mac": "bun build packages/cli/src/index.tsx --compile --outfile dist/border-code-macos --target bun-darwin-arm64",
+    "build:mac-x64": "bun build packages/cli/src/index.tsx --compile --outfile dist/border-code-macos-x64 --target bun-darwin-x64",
+    "build:linux": "bun build packages/cli/src/index.tsx --compile --outfile dist/border-code-linux --target bun-linux-x64",
+    "build:linux-arm": "bun build packages/cli/src/index.tsx --compile --outfile dist/border-code-linux-arm --target bun-linux-arm64",
+    "build:windows": "bun build packages/cli/src/index.tsx --compile --outfile dist/border-code-windows.exe --target bun-windows-x64",
+    "build:all": "bun run build:mac && bun run build:mac-x64 && bun run build:linux && bun run build:linux-arm && bun run build:windows"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "ora": "^9.4.0",
+    "react-router": "^7"
+  }
 }

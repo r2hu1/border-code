@@ -34,7 +34,7 @@ export default function Session() {
 		};
 
 		fetchSessionData();
-	}, []);
+	}, [id]);
 
 	return (
 		<SessionShell onSubmit={() => {}} inputDisabled>

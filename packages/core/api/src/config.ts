@@ -52,7 +52,12 @@ export async function getConfig() {
 		return existing;
 	}
 
-	const data: ConfigData = { id: "default", provider: "", apiKey: "", model: "" };
+	const data: ConfigData = {
+		id: "default",
+		provider: "",
+		apiKey: "",
+		model: "",
+	};
 	writeConfig(data);
 	return data;
 }
@@ -66,7 +71,12 @@ export async function updateConfig({
 	apiKey?: string;
 	model?: string;
 }) {
-	const existing = readConfig() ?? { id: "default", provider: "", apiKey: "", model: "" };
+	const existing = readConfig() ?? {
+		id: "default",
+		provider: "",
+		apiKey: "",
+		model: "",
+	};
 
 	if (provider !== undefined) existing.provider = provider;
 	if (apiKey !== undefined) existing.apiKey = apiKey;

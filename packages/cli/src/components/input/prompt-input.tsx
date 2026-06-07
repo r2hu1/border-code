@@ -8,7 +8,7 @@ import type { KeyBinding, TextareaRenderable } from "@opentui/core";
 import { useDialog } from "../../providers/dialog";
 import { ThemeDialogContent } from "../dialogs/theme/theme-dialog";
 import { CommandMenuContent } from "../dialogs/menu/command";
-import { MENU_ITEMS } from "../dialogs/menu/items";
+import type { MENU_ITEMS } from "../dialogs/menu/items";
 import { useKeyboardLayer } from "../../providers/config/keyboard";
 import { useKeyboard } from "@opentui/react";
 

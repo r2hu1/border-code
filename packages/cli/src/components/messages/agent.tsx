@@ -69,7 +69,7 @@ function ToolCalls({ message }: { message: Message }) {
 
 	let lastUnsettledIndex = -1;
 	for (let i = message.toolCalls.length - 1; i >= 0; i--) {
-		if (message.toolCalls[i].result === undefined) {
+		if (message?.toolCalls?.[i]?.result === undefined) {
 			lastUnsettledIndex = i;
 			break;
 		}

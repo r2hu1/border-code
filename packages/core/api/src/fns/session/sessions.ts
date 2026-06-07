@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { type Session, type Message } from "../../db/schemas";
+import { type Session, type Message } from "../../types";
 import type { ModeType } from "@border-code/shared";
 
 export type Sessions = {

@@ -16,7 +16,7 @@ function summarizeResult(result: unknown): string {
 	const text = typeof result === "string" ? result : JSON.stringify(result);
 	const words = text.split(/\s+/).filter(Boolean);
 	const preview = words.slice(0, 10).join(" ");
-	return words.length > 10 ? preview + "..." : preview;
+	return words.length > 30 ? preview + "..." : preview;
 }
 
 function ReasoningBlock({ reasoning }: { reasoning: string }) {

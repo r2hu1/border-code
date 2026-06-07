@@ -12,11 +12,12 @@ function hasAnything(message: Message): boolean {
 	return !!(message.content || message.reasoning || message.toolCalls?.length);
 }
 
-function summarizeResult(result: unknown): string {
-	const text = typeof result === "string" ? result : JSON.stringify(result);
-	const words = text.split(/\s+/).filter(Boolean);
-	const preview = words.slice(0, 10).join(" ");
-	return words.length > 30 ? preview + "..." : preview;
+function summarizeArgs(args: Record<string, unknown>): string {
+	const entries = Object.entries(args);
+	if (entries.length === 0) return "";
+	const [, first] = entries[0];
+	const str = typeof first === "string" ? first : JSON.stringify(first);
+	return str.length > 48 ? str.slice(0, 48) + "…" : str;
 }
 
 function ReasoningBlock({ reasoning }: { reasoning: string }) {
@@ -33,23 +34,30 @@ function ReasoningBlock({ reasoning }: { reasoning: string }) {
 	);
 }
 
-function ToolCall({ name, result }: { name: string; result?: unknown }) {
+function ToolCallRow({
+	name,
+	args,
+	result,
+	isActive,
+}: {
+	name: string;
+	args: Record<string, unknown>;
+	result?: unknown;
+	isActive: boolean;
+}) {
 	const { colors } = useTheme();
-	const hasResult = result !== undefined;
+	const settled = result !== undefined;
+
 	return (
 		<box flexDirection="row" gap={1} width="100%">
-			<text fg={colors.dimSeparator}>{"⚙ "}</text>
+			<text fg={colors.dimSeparator}>{"⚙"}</text>
 			<text fg={colors.thinking}>{name}</text>
-			{hasResult ? (
-				<>
-					<text fg={colors.dimSeparator}>{" → "}</text>
-					<text fg={colors.dimSeparator} attributes={TextAttributes.DIM}>
-						{summarizeResult(result)}
-					</text>
-				</>
+			<text fg={colors.dimSeparator}>{"→"}</text>
+			{isActive && !settled ? (
+				<Loader name="circle" />
 			) : (
 				<text fg={colors.dimSeparator} attributes={TextAttributes.DIM}>
-					<Loader name="binary"/>
+					{summarizeArgs(args)}
 				</text>
 			)}
 		</box>
@@ -58,10 +66,25 @@ function ToolCall({ name, result }: { name: string; result?: unknown }) {
 
 function ToolCalls({ message }: { message: Message }) {
 	if (!message.toolCalls?.length) return null;
+
+	let lastUnsettledIndex = -1;
+	for (let i = message.toolCalls.length - 1; i >= 0; i--) {
+		if (message.toolCalls[i].result === undefined) {
+			lastUnsettledIndex = i;
+			break;
+		}
+	}
+
 	return (
 		<box flexDirection="column" width="100%" gap={0} paddingX={1}>
 			{message.toolCalls.map((tc, i) => (
-				<ToolCall key={i} name={tc.toolName} result={tc.result} />
+				<ToolCallRow
+					key={i}
+					name={tc.toolName}
+					args={tc.args}
+					result={tc.result}
+					isActive={i === lastUnsettledIndex}
+				/>
 			))}
 		</box>
 	);

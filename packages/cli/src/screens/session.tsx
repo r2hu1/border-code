@@ -32,7 +32,11 @@ async function streamResponse(
 
 	let finished = false;
 
-	const finish = async (text: string, reasoning?: string, toolCalls?: Message["toolCalls"]) => {
+	const finish = async (
+		text: string,
+		reasoning?: string,
+		toolCalls?: Message["toolCalls"],
+	) => {
 		if (finished) return;
 		finished = true;
 		const final: Message = {
@@ -64,11 +68,19 @@ async function streamResponse(
 				onUpdate([...messages, { ...agentMsg }]);
 			},
 			onToolCall(calls) {
-				agentMsg.toolCalls = [...(agentMsg.toolCalls ?? []), ...calls];
+				const prev = agentMsg.toolCalls ?? [];
+				agentMsg.toolCalls = [
+					...prev.slice(0, prev.length - calls.length),
+					...calls,
+				];
 				onUpdate([...messages, { ...agentMsg }]);
 			},
 			onFinish: async (result) => {
-				await finish(result.text, result.reasoning, result.toolCalls.length ? result.toolCalls : agentMsg.toolCalls);
+				await finish(
+					result.text,
+					result.reasoning,
+					result.toolCalls.length ? result.toolCalls : agentMsg.toolCalls,
+				);
 			},
 			onError(error) {
 				if (finished) return;
@@ -84,7 +96,8 @@ async function streamResponse(
 		if (err instanceof Error && err.name === "AbortError") {
 			await finish(agentMsg.content, undefined, agentMsg.toolCalls);
 		} else {
-			const msg = err instanceof Error ? err.message : "An unexpected error occurred";
+			const msg =
+				err instanceof Error ? err.message : "An unexpected error occurred";
 			await finish(msg, undefined, agentMsg.toolCalls);
 			onToast(msg);
 		}

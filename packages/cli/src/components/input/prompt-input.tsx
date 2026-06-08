@@ -38,7 +38,8 @@ export default function PromptInput({ onSubmit, disabled }: Props) {
 		wasDialogOpen.current = isOpen;
 	}, [isOpen]);
 
-	const handleOnSubmit = async () => {
+  const handleOnSubmit = async () => {
+    if (disabled) return;
 		const text = textareaRef.current?.plainText ?? "";
 		if (!text) return;
 		try {
@@ -98,7 +99,7 @@ export default function PromptInput({ onSubmit, disabled }: Props) {
 					width="100%"
 					gap={1}
 				>
-					<textarea
+          <textarea
 						placeholder="Ask or command anything..."
 						keyBindings={TEXTAREA_KEY_BINDINGS}
 						ref={textareaRef}

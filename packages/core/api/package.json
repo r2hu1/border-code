@@ -9,7 +9,7 @@
 		".": "./src/index.ts"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^3.0.81",

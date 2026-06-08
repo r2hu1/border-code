@@ -8,10 +8,13 @@ import { ThemeDialogContent } from "../theme/theme-dialog";
 import { SessionDialogContent } from "../session/session-dialog-content";
 import { ProvidersDialogContent } from "../providers/providers-menu-content";
 import { SelectModalDialogContent } from "../models/select-model-dialog-content";
+import { useRenderer } from "@opentui/react";
 
 export const CommandMenuContent = () => {
 	const dialog = useDialog();
-	const navigate = useNavigate();
+  const navigate = useNavigate();
+  const renderer = useRenderer();
+
 
 	const handleSelect = useCallback((item: (typeof MENU_ITEMS)[number]) => {
 		switch (item.value) {
@@ -47,9 +50,11 @@ export const CommandMenuContent = () => {
 					children: <ThemeDialogContent />,
 				});
 				break;
-			case "exit":
-				dialog.close();
-				process.exit(1);
+				case "exit":
+          dialog.close();
+          renderer.destroy()
+					setTimeout(() => process.exit(0), 0);
+					break;
 		}
 	}, []);
 

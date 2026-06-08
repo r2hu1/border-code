@@ -20,6 +20,7 @@
 		"@border-code/core-api": "workspace:**",
 		"@border-code/shared": "workspace:**",
 		"@opentui/core": "^0.3.0",
+		"@opentui/core-win32-x64": "^0.3.4",
 		"@opentui/react": "^0.3.0",
 		"chalk": "^5.6.2",
 		"marked": "^17.0.1",

@@ -1,12 +1,11 @@
 # This workflow builds the standalone binaries for all supported platforms.
-# It runs on every push to the main branch and can be triggered manually.
+# It runs on every push of a tag and can be triggered manually.
 name: Build All
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    tags:
+      - '*'
   workflow_dispatch:
 
 jobs:

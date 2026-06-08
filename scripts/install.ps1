@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "r2hu1/border-code"
 $BinaryName = "border-code"
-$File = "border-code-windows-x64.exe"
+$File = "border-code-windows.exe"
 
 $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
 $Tag = $Release.tag_name

@@ -23,18 +23,6 @@ An open-source on-device coding agent that runs entirely in your terminal.
 
 ## Install
 
-### Standalone App
-
-#### macOS / Linux
-```bash
-curl -fsSL https://raw.githubusercontent.com/r2hu1/border-code/main/scripts/install.sh | bash
-```
-
-#### Windows (PowerShell)
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; iwr https://raw.githubusercontent.com/r2hu1/border-code/main/scripts/install.ps1 -UseBasicParsing | iex
-```
-
 ## Quick Start (from source)
 
 ### Prerequisites
